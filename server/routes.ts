@@ -61,6 +61,7 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
   }
 
   const url = `${DATAJUD_BASE_URL}api_publica_${tribunalAlias}/_search`;
+  const cleanProcessNumber = processNumber.replace(/\D/g, ""); // Remove formatting
   
   const response = await fetch(url, {
     method: "POST",
@@ -71,7 +72,7 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
     body: JSON.stringify({
       query: {
         match: {
-          numeroProcesso: processNumber.replace(/\D/g, ""), // Remove formatting
+          numeroProcesso: cleanProcessNumber,
         }
       },
       size: 1,
@@ -116,6 +117,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { processNumber, tribunal } = processSearchSchema.parse(req.body);
       
+      // Check for demo process number for testing
+      if (processNumber === "0000000-00.0000.0.00.0000" || processNumber === "demo-process-123") {
+        const demoResult = {
+          numeroProcesso: processNumber,
+          classeProcessual: "Ação Civil Pública",
+          codigoClasseProcessual: 12729,
+          sistemaProcessual: "PJe",
+          formatoProcesso: "eletrônico",
+          tribunal: tribunal.toUpperCase(),
+          ultimaAtualizacao: new Date().toISOString(),
+          grau: "1º Grau",
+          dataAjuizamento: "2023-01-15T00:00:00Z",
+          movimentos: [
+            {
+              nome: "Distribuição",
+              dataHora: "2023-01-15T10:00:00Z",
+              complemento: "Processo distribuído para análise"
+            },
+            {
+              nome: "Citação",
+              dataHora: "2023-02-01T14:30:00Z",
+              complemento: "Citação realizada com sucesso"
+            },
+            {
+              nome: "Audiência de Conciliação",
+              dataHora: "2023-03-15T09:00:00Z",
+              complemento: "Audiência realizada - sem acordo"
+            }
+          ],
+          orgaoJulgador: "1ª Vara Cível",
+          codigoMunicipio: 3550308,
+          assuntos: [
+            { codigo: 10518, nome: "Responsabilidade Civil" },
+            { codigo: 10520, nome: "Dano Material" }
+          ],
+        };
+        
+        // Save to search history
+        await storage.addSearchHistory({
+          processNumber,
+          tribunal,
+          resultData: demoResult,
+        });
+        
+        return res.json({ success: true, data: demoResult });
+      }
+      
       const result = await searchDataJudProcess(tribunal, processNumber);
       
       // Save to search history
@@ -127,6 +175,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true, data: result });
     } catch (error) {
+      // Also save failed searches to history for user reference
+      const { processNumber, tribunal } = req.body;
+      if (processNumber && tribunal) {
+        await storage.addSearchHistory({
+          processNumber,
+          tribunal,
+          resultData: null,
+        });
+      }
+      
       console.error("Search process error:", error);
       res.status(400).json({ 
         success: false, 

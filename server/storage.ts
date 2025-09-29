@@ -34,6 +34,7 @@ export class MemStorage implements IStorage {
       ...insertSearch,
       id,
       searchedAt: new Date(),
+      resultData: insertSearch.resultData || null,
     };
     this.searchHistory.set(id, search);
     return search;
