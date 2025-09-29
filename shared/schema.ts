@@ -42,7 +42,17 @@ export const processSearchSchema = z.object({
   tribunal: z.string().min(1, "Tribunal é obrigatório"),
 });
 
+export const advancedSearchSchema = z.object({
+  tribunal: z.string().min(1, "Tribunal é obrigatório"),
+  processClass: z.string().optional(),
+  judgingBody: z.string().optional(),
+  filingDateFrom: z.string().optional(),
+  filingDateTo: z.string().optional(),
+  searchTerm: z.string().optional(),
+});
+
 export type ProcessSearchRequest = z.infer<typeof processSearchSchema>;
+export type AdvancedSearchRequest = z.infer<typeof advancedSearchSchema>;
 
 export const movementSchema = z.object({
   nome: z.string(),

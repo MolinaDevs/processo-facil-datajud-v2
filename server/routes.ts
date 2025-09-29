@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { processSearchSchema, insertSearchHistorySchema, insertFavoriteSchema } from "@shared/schema";
+import { processSearchSchema, advancedSearchSchema, insertSearchHistorySchema, insertFavoriteSchema } from "@shared/schema";
 import { z } from "zod";
 
 // Since we can't install busca-processos-judiciais in this environment,
@@ -110,6 +110,114 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
   };
 }
 
+async function advancedSearchDataJud(searchParams: any) {
+  const { tribunal, processClass, judgingBody, filingDateFrom, filingDateTo, searchTerm } = searchParams;
+  
+  const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
+  if (!tribunalAlias) {
+    throw new Error(`Tribunal não suportado: ${tribunal}`);
+  }
+
+  const url = `${DATAJUD_BASE_URL}api_publica_${tribunalAlias}/_search`;
+  
+  // Build Elasticsearch query
+  const query: any = {
+    bool: {
+      must: []
+    }
+  };
+
+  // Add process class filter
+  if (processClass) {
+    query.bool.must.push({
+      match: {
+        "classe.nome": processClass
+      }
+    });
+  }
+
+  // Add judging body filter
+  if (judgingBody) {
+    query.bool.must.push({
+      match: {
+        "orgaoJulgador.nome": judgingBody
+      }
+    });
+  }
+
+  // Add date range filter
+  if (filingDateFrom || filingDateTo) {
+    const dateRange: any = {};
+    if (filingDateFrom) dateRange.gte = filingDateFrom;
+    if (filingDateTo) dateRange.lte = filingDateTo;
+    
+    query.bool.must.push({
+      range: {
+        dataAjuizamento: dateRange
+      }
+    });
+  }
+
+  // Add general search term
+  if (searchTerm) {
+    query.bool.must.push({
+      multi_match: {
+        query: searchTerm,
+        fields: ["classe.nome", "orgaoJulgador.nome", "assuntos.nome"]
+      }
+    });
+  }
+
+  // If no filters specified, return error
+  if (query.bool.must.length === 0) {
+    throw new Error("É necessário especificar pelo menos um filtro de busca");
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query,
+      size: 20, // Return more results for advanced search
+      sort: [{ dataAjuizamento: { order: "desc" } }]
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Erro na API DataJud: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  
+  if (!data.hits || !data.hits.hits || data.hits.hits.length === 0) {
+    throw new Error("Nenhum processo encontrado com os filtros especificados");
+  }
+
+  // Transform all results
+  return data.hits.hits.map((hit: any) => {
+    const processData = hit._source;
+    return {
+      numeroProcesso: processData.numeroProcesso || "Não informado",
+      classeProcessual: processData.classe?.nome || "Não informado",
+      codigoClasseProcessual: processData.classe?.codigo || 0,
+      sistemaProcessual: processData.sistema || "Não informado",
+      formatoProcesso: processData.formato || "eletrônico",
+      tribunal: tribunal.toUpperCase(),
+      ultimaAtualizacao: processData.dataUltimaAtualizacao || new Date().toISOString(),
+      grau: processData.grau || "Não informado",
+      dataAjuizamento: processData.dataAjuizamento || "Não informado",
+      movimentos: processData.movimentos || [],
+      orgaoJulgador: processData.orgaoJulgador?.nome || "Não informado",
+      codigoMunicipio: processData.orgaoJulgador?.codigoMunicipioIBGE || 0,
+      assuntos: processData.assuntos || [],
+    };
+  });
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Search process endpoint
@@ -189,6 +297,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ 
         success: false, 
         error: error instanceof Error ? error.message : "Erro na busca do processo" 
+      });
+    }
+  });
+
+  // Advanced search endpoint
+  app.post("/api/advanced-search", async (req, res) => {
+    try {
+      const searchParams = advancedSearchSchema.parse(req.body);
+      
+      // Check for demo advanced search
+      if (searchParams.processClass === "Demo" || searchParams.searchTerm === "demo") {
+        const demoResults = [
+          {
+            numeroProcesso: "1234567-89.2023.8.26.0001",
+            classeProcessual: "Ação de Cobrança",
+            codigoClasseProcessual: 10234,
+            sistemaProcessual: "PJe",
+            formatoProcesso: "eletrônico",
+            tribunal: searchParams.tribunal.toUpperCase(),
+            ultimaAtualizacao: new Date().toISOString(),
+            grau: "1º Grau",
+            dataAjuizamento: "2023-01-15T00:00:00Z",
+            movimentos: [
+              {
+                nome: "Distribuição",
+                dataHora: "2023-01-15T10:00:00Z",
+                complemento: "Processo distribuído"
+              }
+            ],
+            orgaoJulgador: "2ª Vara Cível",
+            codigoMunicipio: 3550308,
+            assuntos: [
+              { codigo: 10518, nome: "Cobrança de Dívida" }
+            ],
+          },
+          {
+            numeroProcesso: "2345678-90.2023.8.26.0002",
+            classeProcessual: "Ação de Cobrança",
+            codigoClasseProcessual: 10234,
+            sistemaProcessual: "PJe",
+            formatoProcesso: "eletrônico",
+            tribunal: searchParams.tribunal.toUpperCase(),
+            ultimaAtualizacao: new Date().toISOString(),
+            grau: "1º Grau",
+            dataAjuizamento: "2023-02-10T00:00:00Z",
+            movimentos: [
+              {
+                nome: "Distribuição",
+                dataHora: "2023-02-10T09:00:00Z",
+                complemento: "Processo distribuído"
+              }
+            ],
+            orgaoJulgador: "3ª Vara Cível",
+            codigoMunicipio: 3550308,
+            assuntos: [
+              { codigo: 10518, nome: "Cobrança de Dívida" }
+            ],
+          }
+        ];
+        
+        // Save each result to search history
+        for (const result of demoResults) {
+          await storage.addSearchHistory({
+            processNumber: result.numeroProcesso,
+            tribunal: searchParams.tribunal,
+            resultData: result,
+          });
+        }
+        
+        return res.json({ success: true, data: demoResults });
+      }
+      
+      const results = await advancedSearchDataJud(searchParams);
+      
+      // Save first result to search history
+      if (results.length > 0) {
+        await storage.addSearchHistory({
+          processNumber: results[0].numeroProcesso,
+          tribunal: searchParams.tribunal,
+          resultData: results[0],
+        });
+      }
+      
+      res.json({ success: true, data: results });
+    } catch (error) {
+      console.error("Advanced search error:", error);
+      res.status(400).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Erro na busca avançada" 
       });
     }
   });

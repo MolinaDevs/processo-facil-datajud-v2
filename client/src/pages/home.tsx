@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ProcessSearchForm from "@/components/process-search-form";
+import AdvancedSearchForm from "@/components/advanced-search-form";
 import ProcessResults from "@/components/process-results";
+import AdvancedSearchResults from "@/components/advanced-search-results";
 import SearchHistory from "@/components/search-history";
 import { type ProcessResult } from "@shared/schema";
 import { type ApiResponse } from "@/lib/types";
 
 export default function Home() {
   const [searchResult, setSearchResult] = useState<ProcessResult | null>(null);
+  const [advancedSearchResults, setAdvancedSearchResults] = useState<ProcessResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const { data: searchHistory, refetch: refetchHistory } = useQuery<ApiResponse<any[]>>({
@@ -20,7 +23,19 @@ export default function Home() {
 
   const handleSearchSuccess = (result: ProcessResult) => {
     setSearchResult(result);
+    setAdvancedSearchResults([]); // Clear advanced results
     refetchHistory();
+  };
+
+  const handleAdvancedSearchSuccess = (results: ProcessResult[]) => {
+    setAdvancedSearchResults(results);
+    setSearchResult(null); // Clear single result
+    refetchHistory();
+  };
+
+  const handleProcessSelect = (result: ProcessResult) => {
+    setSearchResult(result);
+    setAdvancedSearchResults([]); // Clear advanced results when selecting from list
   };
 
   const handleFavoriteToggle = () => {
@@ -64,6 +79,19 @@ export default function Home() {
               setIsSearching={setIsSearching}
             />
 
+            <AdvancedSearchForm 
+              onSearchSuccess={handleAdvancedSearchSuccess}
+              isSearching={isSearching}
+              setIsSearching={setIsSearching}
+            />
+
+            {advancedSearchResults.length > 0 && (
+              <AdvancedSearchResults 
+                results={advancedSearchResults}
+                onProcessSelect={handleProcessSelect}
+              />
+            )}
+
             {searchResult && (
               <ProcessResults 
                 result={searchResult} 
@@ -77,7 +105,7 @@ export default function Home() {
           <div className="hidden lg:block w-80">
             <SearchHistory 
               history={searchHistory?.data || []} 
-              onProcessSelect={setSearchResult}
+              onProcessSelect={handleProcessSelect}
             />
           </div>
         </div>
