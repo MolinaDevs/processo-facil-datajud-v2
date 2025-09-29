@@ -1,8 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { processSearchSchema, advancedSearchSchema, bulkSearchSchema, insertSearchHistorySchema, insertFavoriteSchema, type BulkSearchResult } from "@shared/schema";
+import { processSearchSchema, advancedSearchSchema, bulkSearchSchema, exportRequestSchema, insertSearchHistorySchema, insertFavoriteSchema, type BulkSearchResult, type ProcessResult } from "@shared/schema";
 import { z } from "zod";
+import PDFDocument from "pdfkit";
+import { stringify } from "csv-stringify/sync";
 
 // Since we can't install busca-processos-judiciais in this environment,
 // we'll implement direct API calls to DataJud
@@ -308,6 +310,162 @@ async function bulkSearchDataJud(tribunal: string, processNumbers: string[]): Pr
   return results;
 }
 
+// Export utility functions
+function generatePDF(processes: ProcessResult[], title: string = "Relatório de Processos", includeMovements: boolean = true, includeSubjects: boolean = true): Buffer {
+  const doc = new PDFDocument({ 
+    margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    size: 'A4'
+  });
+  
+  const buffers: Buffer[] = [];
+  doc.on('data', buffers.push.bind(buffers));
+  
+  // Header
+  doc.fontSize(16).font('Helvetica-Bold').text(title, { align: 'center' });
+  doc.fontSize(10).text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, { align: 'center' });
+  doc.moveDown(2);
+  
+  processes.forEach((process, index) => {
+    if (index > 0) {
+      doc.addPage();
+    }
+    
+    // Process Header
+    doc.fontSize(14).font('Helvetica-Bold').text(`Processo: ${process.numeroProcesso}`);
+    doc.moveDown(0.5);
+    
+    // Basic Information
+    doc.fontSize(10).font('Helvetica');
+    doc.text(`Classe Processual: ${process.classeProcessual}`);
+    doc.text(`Tribunal: ${process.tribunal}`);
+    doc.text(`Órgão Julgador: ${process.orgaoJulgador}`);
+    doc.text(`Grau: ${process.grau}`);
+    doc.text(`Sistema: ${process.sistemaProcessual} (${process.formatoProcesso})`);
+    doc.text(`Data de Ajuizamento: ${new Date(process.dataAjuizamento).toLocaleDateString('pt-BR')}`);
+    doc.text(`Última Atualização: ${new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR')}`);
+    doc.moveDown(1);
+    
+    // Subjects
+    if (includeSubjects && process.assuntos.length > 0) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Assuntos:');
+      doc.fontSize(10).font('Helvetica');
+      process.assuntos.forEach(subject => {
+        doc.text(`• ${subject.nome} (${subject.codigo})`);
+      });
+      doc.moveDown(1);
+    }
+    
+    // Movements
+    if (includeMovements && process.movimentos.length > 0) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Movimentações:');
+      doc.fontSize(10).font('Helvetica');
+      process.movimentos.forEach(movement => {
+        const date = new Date(movement.dataHora).toLocaleDateString('pt-BR');
+        const time = new Date(movement.dataHora).toLocaleTimeString('pt-BR');
+        doc.text(`• ${date} ${time} - ${movement.nome}`);
+        if (movement.complemento) {
+          doc.text(`  ${movement.complemento}`);
+        }
+      });
+    }
+  });
+  
+  doc.end();
+  
+  return Buffer.concat(buffers);
+}
+
+function generateCSV(processes: ProcessResult[], includeMovements: boolean = true, includeSubjects: boolean = true): string {
+  const records: any[] = [];
+  
+  processes.forEach(process => {
+    const baseRecord = {
+      'Número do Processo': process.numeroProcesso,
+      'Classe Processual': process.classeProcessual,
+      'Tribunal': process.tribunal,
+      'Órgão Julgador': process.orgaoJulgador,
+      'Grau': process.grau,
+      'Sistema': process.sistemaProcessual,
+      'Formato': process.formatoProcesso,
+      'Data de Ajuizamento': new Date(process.dataAjuizamento).toLocaleDateString('pt-BR'),
+      'Última Atualização': new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR'),
+    };
+    
+    if (includeSubjects) {
+      baseRecord['Assuntos'] = process.assuntos.map(s => `${s.nome} (${s.codigo})`).join('; ');
+    }
+    
+    if (includeMovements && process.movimentos.length > 0) {
+      process.movimentos.forEach((movement, index) => {
+        const record = { ...baseRecord };
+        if (index === 0) {
+          // First movement includes all process data
+        } else {
+          // Subsequent movements only include movement data
+          Object.keys(record).forEach(key => {
+            if (!key.startsWith('Movimento')) {
+              record[key] = '';
+            }
+          });
+        }
+        
+        record[`Movimento ${index + 1} - Data`] = new Date(movement.dataHora).toLocaleDateString('pt-BR');
+        record[`Movimento ${index + 1} - Hora`] = new Date(movement.dataHora).toLocaleTimeString('pt-BR');
+        record[`Movimento ${index + 1} - Nome`] = movement.nome;
+        record[`Movimento ${index + 1} - Complemento`] = movement.complemento || '';
+        
+        records.push(record);
+      });
+    } else {
+      records.push(baseRecord);
+    }
+  });
+  
+  return stringify(records, { 
+    header: true,
+    delimiter: ',',
+    quoted: true,
+    quotedEmpty: true,
+    encodeBOM: true
+  });
+}
+
+function generateJSON(processes: ProcessResult[], includeMovements: boolean = true, includeSubjects: boolean = true): string {
+  const filteredProcesses = processes.map(process => {
+    const filtered: any = {
+      numeroProcesso: process.numeroProcesso,
+      classeProcessual: process.classeProcessual,
+      tribunal: process.tribunal,
+      orgaoJulgador: process.orgaoJulgador,
+      grau: process.grau,
+      sistemaProcessual: process.sistemaProcessual,
+      formatoProcesso: process.formatoProcesso,
+      dataAjuizamento: process.dataAjuizamento,
+      ultimaAtualizacao: process.ultimaAtualizacao,
+    };
+    
+    if (includeSubjects) {
+      filtered.assuntos = process.assuntos;
+    }
+    
+    if (includeMovements) {
+      filtered.movimentos = process.movimentos;
+    }
+    
+    return filtered;
+  });
+  
+  return JSON.stringify({
+    metadata: {
+      geradoEm: new Date().toISOString(),
+      totalProcessos: processes.length,
+      includeMovimentos: includeMovements,
+      includeAssuntos: includeSubjects,
+    },
+    processos: filteredProcesses
+  }, null, 2);
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Search process endpoint
@@ -397,7 +555,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const searchParams = advancedSearchSchema.parse(req.body);
       
       // Check for demo advanced search
-      if (searchParams.processClass === "Demo" || searchParams.searchTerm === "demo") {
+      if (searchParams.processClass === "Demo" || 
+          searchParams.searchTerm === "demo" ||
+          searchParams.searchTerm === "demo-process-123" ||
+          searchParams.searchTerm === "0000000-00.0000.0.00.0000") {
         const demoResults = [
           {
             numeroProcesso: "1234567-89.2023.8.26.0001",
@@ -556,6 +717,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ 
         success: false, 
         error: error instanceof Error ? error.message : "Erro na busca em lote" 
+      });
+    }
+  });
+
+  // Export data endpoint
+  app.post("/api/export", async (req, res) => {
+    try {
+      const { format, data, title, includeMovements, includeSubjects } = exportRequestSchema.parse(req.body);
+      
+      if (!data || data.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Nenhum dado fornecido para exportação"
+        });
+      }
+
+      const filename = `processos_${new Date().toISOString().split('T')[0]}`;
+      
+      switch (format) {
+        case "pdf":
+          const pdfBuffer = generatePDF(data, title, includeMovements, includeSubjects);
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
+          res.send(pdfBuffer);
+          break;
+          
+        case "csv":
+          const csvContent = generateCSV(data, includeMovements, includeSubjects);
+          res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+          res.send(csvContent);
+          break;
+          
+        case "json":
+          const jsonContent = generateJSON(data, includeMovements, includeSubjects);
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
+          res.send(jsonContent);
+          break;
+          
+        default:
+          return res.status(400).json({
+            success: false,
+            error: "Formato de exportação não suportado"
+          });
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Erro na exportação de dados"
       });
     }
   });

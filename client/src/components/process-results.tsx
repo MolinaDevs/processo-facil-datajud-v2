@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -8,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ProcessTimeline from "./process-timeline";
+import ExportDialog from "./export-dialog";
 
 interface ProcessResultsProps {
   result: ProcessResult;
@@ -21,6 +22,7 @@ export default function ProcessResults({
   onFavoriteToggle, 
   favorites 
 }: ProcessResultsProps) {
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -109,6 +111,15 @@ export default function ProcessResults({
               >
                 <i className={isFavorited ? "fas fa-heart text-red-500" : "far fa-heart"}></i>
               </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsExportDialogOpen(true)}
+                data-testid="button-export" 
+                title="Exportar Dados"
+              >
+                <i className="fas fa-download"></i>
+              </Button>
               <Button variant="ghost" size="icon" data-testid="button-share" title="Compartilhar">
                 <i className="fas fa-share-alt"></i>
               </Button>
@@ -193,8 +204,35 @@ export default function ProcessResults({
         </CardContent>
       </Card>
 
-      {/* Process Movements Timeline */}
-      <ProcessTimeline movements={result.movimentos || []} />
+      {/* Process Movements Timeline - Component not implemented yet */}
+      {result.movimentos && result.movimentos.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Movimentações do Processo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {result.movimentos.map((movement, index) => (
+                <div key={index} className="border-l-2 border-primary pl-4 pb-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-sm font-medium text-foreground">
+                      {movement.nome}
+                    </h5>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(movement.dataHora)}
+                    </span>
+                  </div>
+                  {movement.complemento && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {movement.complemento}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <Card>
@@ -206,7 +244,8 @@ export default function ProcessResults({
             <Button 
               variant="outline" 
               className="flex items-center space-x-3 p-4 h-auto"
-              data-testid="button-export"
+              onClick={() => setIsExportDialogOpen(true)}
+              data-testid="button-export-action"
             >
               <i className="fas fa-download text-primary"></i>
               <span className="text-sm font-medium">Exportar Dados</span>
@@ -242,6 +281,14 @@ export default function ProcessResults({
           </div>
         </CardContent>
       </Card>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        data={[result]}
+        defaultTitle={`Processo ${result.numeroProcesso}`}
+      />
     </div>
   );
 }

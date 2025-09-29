@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ExportDialog from "./export-dialog";
 
 interface BulkSearchResultsProps {
   results: BulkSearchResult[];
@@ -15,6 +16,7 @@ interface BulkSearchResultsProps {
 
 export default function BulkSearchResults({ results, onProcessSelect }: BulkSearchResultsProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const resultsPerPage = 10;
   
   // Categorize results
@@ -264,77 +266,102 @@ export default function BulkSearchResults({ results, onProcessSelect }: BulkSear
   );
 
   return (
-    <Card className="mb-8" data-testid="bulk-search-results">
-      <CardHeader>
-        <CardTitle>Resultados da Busca em Lote</CardTitle>
-        <CardDescription>
-          {results.length} processos processados • {successResults.length} encontrados • {notFoundResults.length} não encontrados • {errorResults.length} erros
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Card className="mb-8" data-testid="bulk-search-results">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Resultados da Busca em Lote</CardTitle>
+              <CardDescription>
+                {results.length} processos processados • {successResults.length} encontrados • {notFoundResults.length} não encontrados • {errorResults.length} erros
+              </CardDescription>
+            </div>
+            {successResults.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsExportDialogOpen(true)}
+                data-testid="button-export-bulk-results"
+              >
+                <i className="fas fa-download mr-2"></i>
+                Exportar Resultados
+              </Button>
+            )}
+          </div>
+        </CardHeader>
 
-      <CardContent>
-        <Tabs defaultValue="success" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger 
-              value="success" 
-              className="flex items-center gap-2"
-              data-testid="tab-success-results"
-            >
-              <i className="fas fa-check-circle text-green-600"></i>
-              Encontrados ({successResults.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="not-found" 
-              className="flex items-center gap-2"
-              data-testid="tab-not-found-results"
-            >
-              <i className="fas fa-search-minus text-yellow-600"></i>
-              Não encontrados ({notFoundResults.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="errors" 
-              className="flex items-center gap-2"
-              data-testid="tab-error-results"
-            >
-              <i className="fas fa-exclamation-circle text-red-600"></i>
-              Erros ({errorResults.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="success" className="mt-4">
-            {successResults.length > 0 ? (
-              renderSuccessResults(successResults)
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <i className="fas fa-search text-4xl mb-4"></i>
-                <p>Nenhum processo foi encontrado com sucesso</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="not-found" className="mt-4">
-            {notFoundResults.length > 0 ? (
-              renderNotFoundResults(notFoundResults)
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <i className="fas fa-check-circle text-4xl mb-4"></i>
-                <p>Todos os processos foram encontrados</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="errors" className="mt-4">
-            {errorResults.length > 0 ? (
-              renderErrorResults(errorResults)
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <i className="fas fa-check-circle text-4xl mb-4"></i>
-                <p>Nenhum erro ocorreu durante a busca</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        <CardContent>
+          <Tabs defaultValue="success" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger 
+                value="success" 
+                className="flex items-center gap-2"
+                data-testid="tab-success-results"
+              >
+                <i className="fas fa-check-circle text-green-600"></i>
+                Encontrados ({successResults.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="not-found" 
+                className="flex items-center gap-2"
+                data-testid="tab-not-found-results"
+              >
+                <i className="fas fa-search-minus text-yellow-600"></i>
+                Não encontrados ({notFoundResults.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="errors" 
+                className="flex items-center gap-2"
+                data-testid="tab-error-results"
+              >
+                <i className="fas fa-exclamation-circle text-red-600"></i>
+                Erros ({errorResults.length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="success" className="mt-4">
+              {successResults.length > 0 ? (
+                renderSuccessResults(successResults)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <i className="fas fa-search text-4xl mb-4"></i>
+                  <p>Nenhum processo foi encontrado com sucesso</p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="not-found" className="mt-4">
+              {notFoundResults.length > 0 ? (
+                renderNotFoundResults(notFoundResults)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <i className="fas fa-check-circle text-4xl mb-4"></i>
+                  <p>Todos os processos foram encontrados</p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="errors" className="mt-4">
+              {errorResults.length > 0 ? (
+                renderErrorResults(errorResults)
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <i className="fas fa-check-circle text-4xl mb-4"></i>
+                  <p>Nenhum erro ocorreu durante a busca</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        data={successResults.map(r => r.result!).filter(Boolean)}
+        defaultTitle="Resultados da Busca em Lote"
+      />
+    </>
   );
 }

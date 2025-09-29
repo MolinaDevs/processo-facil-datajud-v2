@@ -96,7 +96,16 @@ export const bulkSearchResultSchema = z.object({
   status: z.enum(["success", "error", "not_found"]),
 });
 
+export const exportRequestSchema = z.object({
+  format: z.enum(["pdf", "csv", "json"]),
+  data: z.array(processResultSchema),
+  title: z.string().optional(),
+  includeMovements: z.boolean().default(true),
+  includeSubjects: z.boolean().default(true),
+});
+
 export type ProcessResult = z.infer<typeof processResultSchema>;
 export type Movement = z.infer<typeof movementSchema>;
 export type Subject = z.infer<typeof subjectSchema>;
 export type BulkSearchResult = z.infer<typeof bulkSearchResultSchema>;
+export type ExportRequest = z.infer<typeof exportRequestSchema>;
