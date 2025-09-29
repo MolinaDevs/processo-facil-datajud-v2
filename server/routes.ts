@@ -1,13 +1,16 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { processSearchSchema, advancedSearchSchema, insertSearchHistorySchema, insertFavoriteSchema } from "@shared/schema";
+import { processSearchSchema, advancedSearchSchema, bulkSearchSchema, insertSearchHistorySchema, insertFavoriteSchema, type BulkSearchResult } from "@shared/schema";
 import { z } from "zod";
 
 // Since we can't install busca-processos-judiciais in this environment,
 // we'll implement direct API calls to DataJud
 const DATAJUD_BASE_URL = "https://api-publica.datajud.cnj.jus.br/";
-const API_KEY = process.env.DATAJUD_API_KEY || "APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==";
+const API_KEY = process.env.DATAJUD_API_KEY;
+
+// For demo/development purposes, we'll use demo mode when no API key is set
+const isDemoMode = !API_KEY;
 
 // Tribunal mappings
 const tribunalAliases: Record<string, string> = {
@@ -55,6 +58,11 @@ const tribunalAliases: Record<string, string> = {
 };
 
 async function searchDataJudProcess(tribunal: string, processNumber: string) {
+  // If no API key is configured, force demo mode for any process
+  if (isDemoMode) {
+    throw new Error("Processo não encontrado");
+  }
+
   const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
   if (!tribunalAlias) {
     throw new Error(`Tribunal não suportado: ${tribunal}`);
@@ -66,7 +74,7 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": API_KEY,
+      "Authorization": API_KEY!,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -113,6 +121,11 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
 async function advancedSearchDataJud(searchParams: any) {
   const { tribunal, processClass, judgingBody, filingDateFrom, filingDateTo, searchTerm } = searchParams;
   
+  // If no API key is configured, force demo mode
+  if (isDemoMode) {
+    throw new Error("Nenhum processo encontrado com os filtros especificados");
+  }
+
   const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
   if (!tribunalAlias) {
     throw new Error(`Tribunal não suportado: ${tribunal}`);
@@ -176,7 +189,7 @@ async function advancedSearchDataJud(searchParams: any) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": API_KEY,
+      "Authorization": API_KEY!,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -216,6 +229,83 @@ async function advancedSearchDataJud(searchParams: any) {
       assuntos: processData.assuntos || [],
     };
   });
+}
+
+async function bulkSearchDataJud(tribunal: string, processNumbers: string[]): Promise<BulkSearchResult[]> {
+  const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
+  if (!tribunalAlias) {
+    throw new Error(`Tribunal não suportado: ${tribunal}`);
+  }
+
+  // Process up to 50 numbers in parallel with rate limiting
+  const results: BulkSearchResult[] = [];
+  const batchSize = 10; // Process 10 at a time to avoid overwhelming the API
+  
+  for (let i = 0; i < processNumbers.length; i += batchSize) {
+    const batch = processNumbers.slice(i, i + batchSize);
+    const batchPromises = batch.map(async (processNumber): Promise<BulkSearchResult> => {
+      try {
+        // Check for demo process numbers
+        if (processNumber === "0000000-00.0000.0.00.0000" || 
+            processNumber === "demo-process-123" ||
+            processNumber.includes("demo")) {
+          return {
+            processNumber,
+            result: {
+              numeroProcesso: processNumber,
+              classeProcessual: "Ação Civil Pública (Demo)",
+              codigoClasseProcessual: 12729,
+              sistemaProcessual: "PJe",
+              formatoProcesso: "eletrônico",
+              tribunal: tribunal.toUpperCase(),
+              ultimaAtualizacao: new Date().toISOString(),
+              grau: "1º Grau",
+              dataAjuizamento: "2023-01-15T00:00:00Z",
+              movimentos: [
+                {
+                  nome: "Distribuição",
+                  dataHora: "2023-01-15T10:00:00Z",
+                  complemento: "Processo distribuído para análise"
+                }
+              ],
+              orgaoJulgador: "1ª Vara Cível",
+              codigoMunicipio: 3550308,
+              assuntos: [
+                { codigo: 10518, nome: "Responsabilidade Civil" }
+              ],
+            },
+            error: null,
+            status: "success" as const,
+          };
+        }
+
+        const result = await searchDataJudProcess(tribunal, processNumber);
+        return {
+          processNumber,
+          result,
+          error: null,
+          status: "success" as const,
+        };
+      } catch (error) {
+        return {
+          processNumber,
+          result: null,
+          error: error instanceof Error ? error.message : "Erro desconhecido",
+          status: error instanceof Error && error.message === "Processo não encontrado" ? "not_found" : "error",
+        };
+      }
+    });
+    
+    const batchResults = await Promise.all(batchPromises);
+    results.push(...batchResults);
+    
+    // Add a small delay between batches to respect rate limits
+    if (i + batchSize < processNumbers.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  return results;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -386,6 +476,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ 
         success: false, 
         error: error instanceof Error ? error.message : "Erro na busca avançada" 
+      });
+    }
+  });
+
+  // Bulk search endpoint
+  app.post("/api/bulk-search", async (req, res) => {
+    try {
+      const { tribunal, processNumbers } = bulkSearchSchema.parse(req.body);
+      
+      // Check for demo mode - if any process number contains "demo"
+      const isDemoMode = processNumbers.some(num => 
+        num.includes("demo") || 
+        num === "0000000-00.0000.0.00.0000" || 
+        num === "demo-process-123"
+      );
+      
+      if (isDemoMode) {
+        // Generate demo results for all process numbers
+        const demoResults: BulkSearchResult[] = processNumbers.map((processNumber, index) => ({
+          processNumber,
+          result: {
+            numeroProcesso: processNumber,
+            classeProcessual: `Ação Civil Pública (Demo ${index + 1})`,
+            codigoClasseProcessual: 12729,
+            sistemaProcessual: "PJe",
+            formatoProcesso: "eletrônico",
+            tribunal: tribunal.toUpperCase(),
+            ultimaAtualizacao: new Date().toISOString(),
+            grau: "1º Grau",
+            dataAjuizamento: new Date(2023, 0, 15 + index).toISOString(),
+            movimentos: [
+              {
+                nome: "Distribuição",
+                dataHora: new Date(2023, 0, 15 + index, 10, 0, 0).toISOString(),
+                complemento: `Processo distribuído para análise - Demo ${index + 1}`
+              }
+            ],
+            orgaoJulgador: `${index + 1}ª Vara Cível`,
+            codigoMunicipio: 3550308,
+            assuntos: [
+              { codigo: 10518, nome: "Responsabilidade Civil" }
+            ],
+          },
+          error: null,
+          status: "success" as const,
+        }));
+        
+        // Save successful results to search history
+        for (const result of demoResults) {
+          if (result.status === "success" && result.result) {
+            await storage.addSearchHistory({
+              processNumber: result.processNumber,
+              tribunal: tribunal,
+              resultData: result.result,
+            });
+          }
+        }
+        
+        return res.json({ success: true, data: demoResults });
+      }
+      
+      const results = await bulkSearchDataJud(tribunal, processNumbers);
+      
+      // Save successful results to search history
+      for (const result of results) {
+        if (result.status === "success" && result.result) {
+          await storage.addSearchHistory({
+            processNumber: result.processNumber,
+            tribunal: tribunal,
+            resultData: result.result,
+          });
+        }
+      }
+      
+      res.json({ success: true, data: results });
+    } catch (error) {
+      console.error("Bulk search error:", error);
+      res.status(400).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Erro na busca em lote" 
       });
     }
   });

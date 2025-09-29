@@ -2,15 +2,18 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ProcessSearchForm from "@/components/process-search-form";
 import AdvancedSearchForm from "@/components/advanced-search-form";
+import BulkSearchForm from "@/components/bulk-search-form";
 import ProcessResults from "@/components/process-results";
 import AdvancedSearchResults from "@/components/advanced-search-results";
+import BulkSearchResults from "@/components/bulk-search-results";
 import SearchHistory from "@/components/search-history";
-import { type ProcessResult } from "@shared/schema";
+import { type ProcessResult, type BulkSearchResult } from "@shared/schema";
 import { type ApiResponse } from "@/lib/types";
 
 export default function Home() {
   const [searchResult, setSearchResult] = useState<ProcessResult | null>(null);
   const [advancedSearchResults, setAdvancedSearchResults] = useState<ProcessResult[]>([]);
+  const [bulkSearchResults, setBulkSearchResults] = useState<BulkSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const { data: searchHistory, refetch: refetchHistory } = useQuery<ApiResponse<any[]>>({
@@ -24,18 +27,36 @@ export default function Home() {
   const handleSearchSuccess = (result: ProcessResult) => {
     setSearchResult(result);
     setAdvancedSearchResults([]); // Clear advanced results
+    setBulkSearchResults([]); // Clear bulk results
     refetchHistory();
   };
 
   const handleAdvancedSearchSuccess = (results: ProcessResult[]) => {
     setAdvancedSearchResults(results);
     setSearchResult(null); // Clear single result
+    setBulkSearchResults([]); // Clear bulk results
+    refetchHistory();
+  };
+
+  const handleBulkSearchSuccess = (results: BulkSearchResult[]) => {
+    setBulkSearchResults(results);
+    setSearchResult(null); // Clear single result
+    setAdvancedSearchResults([]); // Clear advanced results
     refetchHistory();
   };
 
   const handleProcessSelect = (result: ProcessResult) => {
     setSearchResult(result);
     setAdvancedSearchResults([]); // Clear advanced results when selecting from list
+    setBulkSearchResults([]); // Clear bulk results
+  };
+
+  const handleBulkProcessSelect = (bulkResult: BulkSearchResult) => {
+    if (bulkResult.result) {
+      setSearchResult(bulkResult.result);
+      setAdvancedSearchResults([]); // Clear advanced results
+      setBulkSearchResults([]); // Clear bulk results
+    }
   };
 
   const handleFavoriteToggle = () => {
@@ -84,6 +105,19 @@ export default function Home() {
               isSearching={isSearching}
               setIsSearching={setIsSearching}
             />
+
+            <BulkSearchForm 
+              onSearchSuccess={handleBulkSearchSuccess}
+              isSearching={isSearching}
+              setIsSearching={setIsSearching}
+            />
+
+            {bulkSearchResults.length > 0 && (
+              <BulkSearchResults 
+                results={bulkSearchResults}
+                onProcessSelect={handleBulkProcessSelect}
+              />
+            )}
 
             {advancedSearchResults.length > 0 && (
               <AdvancedSearchResults 

@@ -51,8 +51,16 @@ export const advancedSearchSchema = z.object({
   searchTerm: z.string().optional(),
 });
 
+export const bulkSearchSchema = z.object({
+  tribunal: z.string().min(1, "Tribunal é obrigatório"),
+  processNumbers: z.array(z.string().min(1, "Número do processo não pode estar vazio"))
+    .min(1, "Pelo menos um número de processo é obrigatório")
+    .max(50, "Máximo de 50 processos por busca"),
+});
+
 export type ProcessSearchRequest = z.infer<typeof processSearchSchema>;
 export type AdvancedSearchRequest = z.infer<typeof advancedSearchSchema>;
+export type BulkSearchRequest = z.infer<typeof bulkSearchSchema>;
 
 export const movementSchema = z.object({
   nome: z.string(),
@@ -81,6 +89,14 @@ export const processResultSchema = z.object({
   assuntos: z.array(subjectSchema),
 });
 
+export const bulkSearchResultSchema = z.object({
+  processNumber: z.string(),
+  result: processResultSchema.nullable(),
+  error: z.string().nullable(),
+  status: z.enum(["success", "error", "not_found"]),
+});
+
 export type ProcessResult = z.infer<typeof processResultSchema>;
 export type Movement = z.infer<typeof movementSchema>;
 export type Subject = z.infer<typeof subjectSchema>;
+export type BulkSearchResult = z.infer<typeof bulkSearchResultSchema>;
