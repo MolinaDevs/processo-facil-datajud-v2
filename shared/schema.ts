@@ -62,10 +62,19 @@ export type ProcessSearchRequest = z.infer<typeof processSearchSchema>;
 export type AdvancedSearchRequest = z.infer<typeof advancedSearchSchema>;
 export type BulkSearchRequest = z.infer<typeof bulkSearchSchema>;
 
+export const tabulatedComplementSchema = z.object({
+  codigo: z.number(),
+  valor: z.number(),
+  nome: z.string(),
+  descricao: z.string(),
+});
+
 export const movementSchema = z.object({
+  codigo: z.number().optional(),
   nome: z.string(),
   dataHora: z.string(),
-  complemento: z.string().nullable(),
+  complemento: z.string().nullable().optional(),
+  complementosTabelados: z.array(tabulatedComplementSchema).optional(),
 });
 
 export const subjectSchema = z.object({
@@ -78,14 +87,18 @@ export const processResultSchema = z.object({
   classeProcessual: z.string(),
   codigoClasseProcessual: z.number(),
   sistemaProcessual: z.string(),
+  codigoSistema: z.number().optional(),
   formatoProcesso: z.string(),
+  codigoFormato: z.number().optional(),
   tribunal: z.string(),
   ultimaAtualizacao: z.string(),
   grau: z.string(),
   dataAjuizamento: z.string(),
+  nivelSigilo: z.number().optional(),
   movimentos: z.array(movementSchema),
   orgaoJulgador: z.string(),
-  codigoMunicipio: z.number(),
+  codigoOrgaoJulgador: z.number().optional(),
+  codigoMunicipio: z.number().optional(),
   assuntos: z.array(subjectSchema),
 });
 
@@ -107,5 +120,6 @@ export const exportRequestSchema = z.object({
 export type ProcessResult = z.infer<typeof processResultSchema>;
 export type Movement = z.infer<typeof movementSchema>;
 export type Subject = z.infer<typeof subjectSchema>;
+export type TabulatedComplement = z.infer<typeof tabulatedComplementSchema>;
 export type BulkSearchResult = z.infer<typeof bulkSearchResultSchema>;
 export type ExportRequest = z.infer<typeof exportRequestSchema>;

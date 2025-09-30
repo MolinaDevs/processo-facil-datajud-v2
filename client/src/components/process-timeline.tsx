@@ -53,12 +53,19 @@ export default function ProcessTimeline({ movements }: ProcessTimelineProps) {
               <div className="flex-shrink-0 w-3 h-3 bg-primary rounded-full mt-2"></div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <p 
-                    className="text-sm font-medium text-foreground"
-                    data-testid={`movement-name-${index}`}
-                  >
-                    {movement.nome}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p 
+                      className="text-sm font-medium text-foreground"
+                      data-testid={`movement-name-${index}`}
+                    >
+                      {movement.nome}
+                    </p>
+                    {movement.codigo && (
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                        Cód. {movement.codigo}
+                      </span>
+                    )}
+                  </div>
                   <time 
                     className="text-xs text-muted-foreground"
                     data-testid={`movement-date-${index}`}
@@ -73,6 +80,18 @@ export default function ProcessTimeline({ movements }: ProcessTimelineProps) {
                   >
                     {movement.complemento}
                   </p>
+                )}
+                {movement.complementosTabelados && movement.complementosTabelados.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {movement.complementosTabelados.map((comp, compIndex) => (
+                      <div 
+                        key={compIndex}
+                        className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded"
+                      >
+                        <span className="font-medium">{comp.descricao}:</span> {comp.nome}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

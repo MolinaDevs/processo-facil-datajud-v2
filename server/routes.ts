@@ -107,15 +107,19 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
     numeroProcesso: processData.numeroProcesso || processNumber,
     classeProcessual: processData.classe?.nome || "Não informado",
     codigoClasseProcessual: processData.classe?.codigo || 0,
-    sistemaProcessual: processData.sistema || "Não informado",
-    formatoProcesso: processData.formato || "eletrônico",
+    sistemaProcessual: processData.sistema?.nome || processData.sistema || "Não informado",
+    codigoSistema: processData.sistema?.codigo,
+    formatoProcesso: processData.formato?.nome || processData.formato || "eletrônico",
+    codigoFormato: processData.formato?.codigo,
     tribunal: tribunal.toUpperCase(),
-    ultimaAtualizacao: processData.dataUltimaAtualizacao || new Date().toISOString(),
+    ultimaAtualizacao: processData.dataHoraUltimaAtualizacao || processData.dataUltimaAtualizacao || new Date().toISOString(),
     grau: processData.grau || "Não informado",
     dataAjuizamento: processData.dataAjuizamento || "Não informado",
+    nivelSigilo: processData.nivelSigilo,
     movimentos: processData.movimentos || [],
     orgaoJulgador: processData.orgaoJulgador?.nome || "Não informado",
-    codigoMunicipio: processData.orgaoJulgador?.codigoMunicipioIBGE || 0,
+    codigoOrgaoJulgador: processData.orgaoJulgador?.codigo,
+    codigoMunicipio: processData.orgaoJulgador?.codigoMunicipioIBGE,
     assuntos: processData.assuntos || [],
   };
 }
@@ -219,15 +223,19 @@ async function advancedSearchDataJud(searchParams: any) {
       numeroProcesso: processData.numeroProcesso || "Não informado",
       classeProcessual: processData.classe?.nome || "Não informado",
       codigoClasseProcessual: processData.classe?.codigo || 0,
-      sistemaProcessual: processData.sistema || "Não informado",
-      formatoProcesso: processData.formato || "eletrônico",
+      sistemaProcessual: processData.sistema?.nome || processData.sistema || "Não informado",
+      codigoSistema: processData.sistema?.codigo,
+      formatoProcesso: processData.formato?.nome || processData.formato || "eletrônico",
+      codigoFormato: processData.formato?.codigo,
       tribunal: tribunal.toUpperCase(),
-      ultimaAtualizacao: processData.dataUltimaAtualizacao || new Date().toISOString(),
+      ultimaAtualizacao: processData.dataHoraUltimaAtualizacao || processData.dataUltimaAtualizacao || new Date().toISOString(),
       grau: processData.grau || "Não informado",
       dataAjuizamento: processData.dataAjuizamento || "Não informado",
+      nivelSigilo: processData.nivelSigilo,
       movimentos: processData.movimentos || [],
       orgaoJulgador: processData.orgaoJulgador?.nome || "Não informado",
-      codigoMunicipio: processData.orgaoJulgador?.codigoMunicipioIBGE || 0,
+      codigoOrgaoJulgador: processData.orgaoJulgador?.codigo,
+      codigoMunicipio: processData.orgaoJulgador?.codigoMunicipioIBGE,
       assuntos: processData.assuntos || [],
     };
   });
@@ -258,19 +266,32 @@ async function bulkSearchDataJud(tribunal: string, processNumbers: string[]): Pr
               classeProcessual: "Ação Civil Pública (Demo)",
               codigoClasseProcessual: 12729,
               sistemaProcessual: "PJe",
+              codigoSistema: 3,
               formatoProcesso: "eletrônico",
+              codigoFormato: 1,
               tribunal: tribunal.toUpperCase(),
               ultimaAtualizacao: new Date().toISOString(),
               grau: "1º Grau",
               dataAjuizamento: "2023-01-15T00:00:00Z",
+              nivelSigilo: 0,
               movimentos: [
                 {
+                  codigo: 26,
                   nome: "Distribuição",
                   dataHora: "2023-01-15T10:00:00Z",
-                  complemento: "Processo distribuído para análise"
+                  complemento: "Processo distribuído para análise",
+                  complementosTabelados: [
+                    {
+                      codigo: 2,
+                      valor: 1,
+                      nome: "competência exclusiva",
+                      descricao: "tipo_de_distribuicao_redistribuicao"
+                    }
+                  ]
                 }
               ],
               orgaoJulgador: "1ª Vara Cível",
+              codigoOrgaoJulgador: 9700,
               codigoMunicipio: 3550308,
               assuntos: [
                 { codigo: 10518, nome: "Responsabilidade Civil" }
@@ -480,29 +501,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           classeProcessual: "Ação Civil Pública",
           codigoClasseProcessual: 12729,
           sistemaProcessual: "PJe",
+          codigoSistema: 3,
           formatoProcesso: "eletrônico",
+          codigoFormato: 1,
           tribunal: tribunal.toUpperCase(),
           ultimaAtualizacao: new Date().toISOString(),
           grau: "1º Grau",
           dataAjuizamento: "2023-01-15T00:00:00Z",
+          nivelSigilo: 0,
           movimentos: [
             {
+              codigo: 26,
               nome: "Distribuição",
               dataHora: "2023-01-15T10:00:00Z",
-              complemento: "Processo distribuído para análise"
+              complemento: "Processo distribuído para análise",
+              complementosTabelados: [
+                {
+                  codigo: 2,
+                  valor: 1,
+                  nome: "competência exclusiva",
+                  descricao: "tipo_de_distribuicao_redistribuicao"
+                }
+              ]
             },
             {
+              codigo: 193,
               nome: "Citação",
               dataHora: "2023-02-01T14:30:00Z",
               complemento: "Citação realizada com sucesso"
             },
             {
+              codigo: 970,
               nome: "Audiência de Conciliação",
               dataHora: "2023-03-15T09:00:00Z",
               complemento: "Audiência realizada - sem acordo"
             }
           ],
           orgaoJulgador: "1ª Vara Cível",
+          codigoOrgaoJulgador: 9700,
           codigoMunicipio: 3550308,
           assuntos: [
             { codigo: 10518, nome: "Responsabilidade Civil" },
@@ -565,19 +601,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             classeProcessual: "Ação de Cobrança",
             codigoClasseProcessual: 10234,
             sistemaProcessual: "PJe",
+            codigoSistema: 3,
             formatoProcesso: "eletrônico",
+            codigoFormato: 1,
             tribunal: searchParams.tribunal.toUpperCase(),
             ultimaAtualizacao: new Date().toISOString(),
             grau: "1º Grau",
             dataAjuizamento: "2023-01-15T00:00:00Z",
+            nivelSigilo: 0,
             movimentos: [
               {
+                codigo: 26,
                 nome: "Distribuição",
                 dataHora: "2023-01-15T10:00:00Z",
                 complemento: "Processo distribuído"
               }
             ],
             orgaoJulgador: "2ª Vara Cível",
+            codigoOrgaoJulgador: 9701,
             codigoMunicipio: 3550308,
             assuntos: [
               { codigo: 10518, nome: "Cobrança de Dívida" }
@@ -588,19 +629,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             classeProcessual: "Ação de Cobrança",
             codigoClasseProcessual: 10234,
             sistemaProcessual: "PJe",
+            codigoSistema: 3,
             formatoProcesso: "eletrônico",
+            codigoFormato: 1,
             tribunal: searchParams.tribunal.toUpperCase(),
             ultimaAtualizacao: new Date().toISOString(),
             grau: "1º Grau",
             dataAjuizamento: "2023-02-10T00:00:00Z",
+            nivelSigilo: 0,
             movimentos: [
               {
+                codigo: 26,
                 nome: "Distribuição",
                 dataHora: "2023-02-10T09:00:00Z",
                 complemento: "Processo distribuído"
               }
             ],
             orgaoJulgador: "3ª Vara Cível",
+            codigoOrgaoJulgador: 9702,
             codigoMunicipio: 3550308,
             assuntos: [
               { codigo: 10518, nome: "Cobrança de Dívida" }
@@ -662,19 +708,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             classeProcessual: `Ação Civil Pública (Demo ${index + 1})`,
             codigoClasseProcessual: 12729,
             sistemaProcessual: "PJe",
+            codigoSistema: 3,
             formatoProcesso: "eletrônico",
+            codigoFormato: 1,
             tribunal: tribunal.toUpperCase(),
             ultimaAtualizacao: new Date().toISOString(),
             grau: "1º Grau",
             dataAjuizamento: new Date(2023, 0, 15 + index).toISOString(),
+            nivelSigilo: 0,
             movimentos: [
               {
+                codigo: 26,
                 nome: "Distribuição",
                 dataHora: new Date(2023, 0, 15 + index, 10, 0, 0).toISOString(),
                 complemento: `Processo distribuído para análise - Demo ${index + 1}`
               }
             ],
             orgaoJulgador: `${index + 1}ª Vara Cível`,
+            codigoOrgaoJulgador: 9700 + index,
             codigoMunicipio: 3550308,
             assuntos: [
               { codigo: 10518, nome: "Responsabilidade Civil" }

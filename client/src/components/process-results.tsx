@@ -201,6 +201,39 @@ export default function ProcessResults({
               </div>
             </div>
           )}
+
+          {/* Technical Information */}
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium text-foreground mb-3">Informações Técnicas</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+              {result.nivelSigilo !== undefined && (
+                <div>
+                  <span className="text-muted-foreground">Nível de Sigilo:</span>
+                  <Badge variant={result.nivelSigilo === 0 ? "default" : "destructive"} className="ml-2">
+                    {result.nivelSigilo === 0 ? "Público" : `Sigilo ${result.nivelSigilo}`}
+                  </Badge>
+                </div>
+              )}
+              {result.codigoSistema && (
+                <div>
+                  <span className="text-muted-foreground">Sistema:</span>
+                  <span className="ml-2 font-mono">{result.sistemaProcessual} (Cód. {result.codigoSistema})</span>
+                </div>
+              )}
+              {result.codigoFormato && (
+                <div>
+                  <span className="text-muted-foreground">Formato:</span>
+                  <span className="ml-2 font-mono">{result.formatoProcesso} (Cód. {result.codigoFormato})</span>
+                </div>
+              )}
+              {result.codigoOrgaoJulgador && (
+                <div>
+                  <span className="text-muted-foreground">Cód. Órgão:</span>
+                  <span className="ml-2 font-mono">{result.codigoOrgaoJulgador}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
