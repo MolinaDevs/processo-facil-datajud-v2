@@ -7,10 +7,12 @@ import ProcessResults from "@/components/process-results";
 import AdvancedSearchResults from "@/components/advanced-search-results";
 import BulkSearchResults from "@/components/bulk-search-results";
 import SearchHistory from "@/components/search-history";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ProcessResult, type BulkSearchResult } from "@shared/schema";
 import { type ApiResponse } from "@/lib/types";
 
 export default function Home() {
+  const [activeSection, setActiveSection] = useState<"buscar" | "historico" | "favoritos" | "ajuda">("buscar");
   const [searchResult, setSearchResult] = useState<ProcessResult | null>(null);
   const [advancedSearchResults, setAdvancedSearchResults] = useState<ProcessResult[]>([]);
   const [bulkSearchResults, setBulkSearchResults] = useState<BulkSearchResult[]>([]);
@@ -26,36 +28,36 @@ export default function Home() {
 
   const handleSearchSuccess = (result: ProcessResult) => {
     setSearchResult(result);
-    setAdvancedSearchResults([]); // Clear advanced results
-    setBulkSearchResults([]); // Clear bulk results
+    setAdvancedSearchResults([]);
+    setBulkSearchResults([]);
     refetchHistory();
   };
 
   const handleAdvancedSearchSuccess = (results: ProcessResult[]) => {
     setAdvancedSearchResults(results);
-    setSearchResult(null); // Clear single result
-    setBulkSearchResults([]); // Clear bulk results
+    setSearchResult(null);
+    setBulkSearchResults([]);
     refetchHistory();
   };
 
   const handleBulkSearchSuccess = (results: BulkSearchResult[]) => {
     setBulkSearchResults(results);
-    setSearchResult(null); // Clear single result
-    setAdvancedSearchResults([]); // Clear advanced results
+    setSearchResult(null);
+    setAdvancedSearchResults([]);
     refetchHistory();
   };
 
   const handleProcessSelect = (result: ProcessResult) => {
     setSearchResult(result);
-    setAdvancedSearchResults([]); // Clear advanced results when selecting from list
-    setBulkSearchResults([]); // Clear bulk results
+    setAdvancedSearchResults([]);
+    setBulkSearchResults([]);
   };
 
   const handleBulkProcessSelect = (bulkResult: BulkSearchResult) => {
     if (bulkResult.result) {
       setSearchResult(bulkResult.result);
-      setAdvancedSearchResults([]); // Clear advanced results
-      setBulkSearchResults([]); // Clear bulk results
+      setAdvancedSearchResults([]);
+      setBulkSearchResults([]);
     }
   };
 
@@ -77,10 +79,34 @@ export default function Home() {
               <span className="hidden sm:inline text-sm text-muted-foreground">Consulta DataJud CNJ</span>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#" className="text-foreground hover:text-primary transition-colors">Buscar</a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">Histórico</a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">Favoritos</a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">Ajuda</a>
+              <button 
+                onClick={() => setActiveSection("buscar")}
+                className={`${activeSection === "buscar" ? "text-foreground font-medium" : "text-muted-foreground"} hover:text-primary transition-colors`}
+                data-testid="nav-buscar"
+              >
+                Buscar
+              </button>
+              <button 
+                onClick={() => setActiveSection("historico")}
+                className={`${activeSection === "historico" ? "text-foreground font-medium" : "text-muted-foreground"} hover:text-primary transition-colors`}
+                data-testid="nav-historico"
+              >
+                Histórico
+              </button>
+              <button 
+                onClick={() => setActiveSection("favoritos")}
+                className={`${activeSection === "favoritos" ? "text-foreground font-medium" : "text-muted-foreground"} hover:text-primary transition-colors`}
+                data-testid="nav-favoritos"
+              >
+                Favoritos
+              </button>
+              <button 
+                onClick={() => setActiveSection("ajuda")}
+                className={`${activeSection === "ajuda" ? "text-foreground font-medium" : "text-muted-foreground"} hover:text-primary transition-colors`}
+                data-testid="nav-ajuda"
+              >
+                Ajuda
+              </button>
             </nav>
             <button className="md:hidden">
               <i className="fas fa-bars text-foreground"></i>
@@ -94,54 +120,178 @@ export default function Home() {
         <div className="flex gap-8">
           {/* Main Content Area */}
           <div className="flex-1">
-            <ProcessSearchForm 
-              onSearchSuccess={handleSearchSuccess}
-              isSearching={isSearching}
-              setIsSearching={setIsSearching}
-            />
+            {activeSection === "buscar" && (
+              <>
+                <ProcessSearchForm 
+                  onSearchSuccess={handleSearchSuccess}
+                  isSearching={isSearching}
+                  setIsSearching={setIsSearching}
+                />
 
-            <AdvancedSearchForm 
-              onSearchSuccess={handleAdvancedSearchSuccess}
-              isSearching={isSearching}
-              setIsSearching={setIsSearching}
-            />
+                <AdvancedSearchForm 
+                  onSearchSuccess={handleAdvancedSearchSuccess}
+                  isSearching={isSearching}
+                  setIsSearching={setIsSearching}
+                />
 
-            <BulkSearchForm 
-              onSearchSuccess={handleBulkSearchSuccess}
-              isSearching={isSearching}
-              setIsSearching={setIsSearching}
-            />
+                <BulkSearchForm 
+                  onSearchSuccess={handleBulkSearchSuccess}
+                  isSearching={isSearching}
+                  setIsSearching={setIsSearching}
+                />
 
-            {bulkSearchResults.length > 0 && (
-              <BulkSearchResults 
-                results={bulkSearchResults}
-                onProcessSelect={handleBulkProcessSelect}
-              />
+                {bulkSearchResults.length > 0 && (
+                  <BulkSearchResults 
+                    results={bulkSearchResults}
+                    onProcessSelect={handleBulkProcessSelect}
+                  />
+                )}
+
+                {advancedSearchResults.length > 0 && (
+                  <AdvancedSearchResults 
+                    results={advancedSearchResults}
+                    onProcessSelect={handleProcessSelect}
+                  />
+                )}
+
+                {searchResult && (
+                  <ProcessResults 
+                    result={searchResult} 
+                    onFavoriteToggle={handleFavoriteToggle}
+                    favorites={favorites?.data || []}
+                  />
+                )}
+              </>
             )}
 
-            {advancedSearchResults.length > 0 && (
-              <AdvancedSearchResults 
-                results={advancedSearchResults}
-                onProcessSelect={handleProcessSelect}
-              />
+            {activeSection === "historico" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Consultas</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Veja todas as suas consultas anteriores
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <SearchHistory 
+                    history={searchHistory?.data || []} 
+                    onProcessSelect={handleProcessSelect}
+                  />
+                </CardContent>
+              </Card>
             )}
 
-            {searchResult && (
-              <ProcessResults 
-                result={searchResult} 
-                onFavoriteToggle={handleFavoriteToggle}
-                favorites={favorites?.data || []}
-              />
+            {activeSection === "favoritos" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Processos Favoritos</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Processos que você marcou como favoritos
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  {favorites?.data && favorites.data.length > 0 ? (
+                    <div className="space-y-3">
+                      {favorites.data
+                        .filter((fav: any) => fav.processData)
+                        .map((fav: any) => (
+                        <div 
+                          key={fav.id} 
+                          className="p-4 border border-border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleProcessSelect(fav.processData)}
+                          data-testid={`favorite-${fav.processNumber}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-foreground">
+                                {fav.processNumber}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {fav.tribunal} - {fav.processData.classeProcessual || "N/A"}
+                              </p>
+                            </div>
+                            <i className="fas fa-heart text-red-500"></i>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      Nenhum processo favoritado ainda.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {activeSection === "ajuda" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Central de Ajuda</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Encontre respostas para suas dúvidas
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Como buscar um processo?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Digite o número do processo no formato CNJ (ex: 0000000-00.0000.0.00.0000) e selecione o tribunal. 
+                      Para testar, use "demo-process-123" ou "0000000-00.0000.0.00.0000".
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">O que é busca avançada?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      A busca avançada permite filtrar processos por classe processual, órgão julgador, 
+                      período de ajuizamento e termos específicos.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Como funciona a busca em lote?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Insira múltiplos números de processo (um por linha, máximo 50) para buscar vários processos de uma vez.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Posso exportar os dados?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Sim! Clique no botão de exportar nos resultados para baixar em PDF, CSV ou JSON.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">De onde vêm os dados?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Todos os dados são obtidos da API Pública do DataJud - CNJ, que consolida informações 
+                      processuais de todos os tribunais do Brasil.
+                      <a 
+                        href="https://datajud-wiki.cnj.jus.br/api-publica/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline ml-1"
+                      >
+                        Saiba mais
+                      </a>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="hidden lg:block w-80">
-            <SearchHistory 
-              history={searchHistory?.data || []} 
-              onProcessSelect={handleProcessSelect}
-            />
-          </div>
+          {activeSection === "buscar" && (
+            <div className="hidden lg:block w-80">
+              <SearchHistory 
+                history={searchHistory?.data || []} 
+                onProcessSelect={handleProcessSelect}
+              />
+            </div>
+          )}
         </div>
       </main>
 
@@ -159,26 +309,43 @@ export default function Home() {
             <div>
               <h5 className="font-semibold text-foreground mb-3">Recursos</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Busca de Processos</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Histórico de Consultas</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Alertas Automáticos</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">API Documentation</a></li>
+                <li>
+                  <button onClick={() => setActiveSection("buscar")} className="hover:text-primary transition-colors">
+                    Busca de Processos
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => setActiveSection("historico")} className="hover:text-primary transition-colors">
+                    Histórico de Consultas
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => setActiveSection("ajuda")} className="hover:text-primary transition-colors">
+                    Central de Ajuda
+                  </button>
+                </li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold text-foreground mb-3">Suporte</h5>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Termos de Uso</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Política de Privacidade</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contato</a></li>
+                <li>
+                  <button onClick={() => setActiveSection("ajuda")} className="hover:text-primary transition-colors">
+                    Central de Ajuda
+                  </button>
+                </li>
+                <li>
+                  <a href="https://datajud-wiki.cnj.jus.br/api-publica/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    Documentação DataJud
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
               © 2024 Processo Fácil. Dados fornecidos pela API Pública do DataJud - CNJ.
-              <a href="https://datajud-wiki.cnj.jus.br/api-publica/" className="text-primary hover:underline ml-1">
+              <a href="https://datajud-wiki.cnj.jus.br/api-publica/" className="text-primary hover:underline ml-1" target="_blank" rel="noopener noreferrer">
                 Documentação oficial
               </a>
             </p>

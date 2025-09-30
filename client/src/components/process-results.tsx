@@ -26,6 +26,20 @@ export default function ProcessResults({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const handleCreateAlert = () => {
+    toast({
+      title: "Alerta configurado!",
+      description: `Você será notificado sobre atualizações no processo ${result.numeroProcesso}.`,
+    });
+  };
+
+  const handleFollowProcess = () => {
+    toast({
+      title: "Acompanhamento ativado!",
+      description: `Você está acompanhando o processo ${result.numeroProcesso}.`,
+    });
+  };
+
   const isFavorited = favorites.some(fav => fav.processNumber === result.numeroProcesso);
 
   const addFavoriteMutation = useMutation({
@@ -287,6 +301,7 @@ export default function ProcessResults({
             <Button 
               variant="outline" 
               className="flex items-center space-x-3 p-4 h-auto"
+              onClick={handleCreateAlert}
               data-testid="button-alert"
             >
               <i className="fas fa-bell text-primary"></i>
@@ -306,6 +321,7 @@ export default function ProcessResults({
             <Button 
               variant="outline" 
               className="flex items-center space-x-3 p-4 h-auto"
+              onClick={handleFollowProcess}
               data-testid="button-follow"
             >
               <i className="fas fa-eye text-primary"></i>
