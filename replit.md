@@ -2,6 +2,12 @@
 
 This is a Brazilian legal process lookup application that allows users to search for judicial processes through the DataJud CNJ API. The application provides a modern web interface for searching court cases, viewing process details, managing search history, and maintaining a favorites list. It features real-time process information retrieval from various Brazilian courts including superior courts (STJ, STF, TST), federal courts (TRF1-6), and state courts (TJSP, TJRJ, etc.).
 
+## Recent Updates (September 30, 2025)
+- **Fixed Navigation**: Header menu (Buscar, Histórico, Favoritos, Ajuda) now properly switches between sections
+- **Enhanced User Feedback**: "Criar Alerta" and "Acompanhar" buttons now provide toast notifications to users
+- **Improved State Persistence**: Active section state is preserved when selecting processes from history or favorites
+- **Data Validation**: Favorites now filter out entries without processData to prevent rendering errors
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
