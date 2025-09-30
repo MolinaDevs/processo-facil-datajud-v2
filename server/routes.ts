@@ -76,7 +76,7 @@ async function searchDataJudProcess(tribunal: string, processNumber: string) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": API_KEY!,
+      "Authorization": `APIKey ${API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -191,7 +191,7 @@ async function advancedSearchDataJud(searchParams: any) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": API_KEY!,
+      "Authorization": `APIKey ${API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
