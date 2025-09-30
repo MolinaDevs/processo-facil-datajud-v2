@@ -62,7 +62,7 @@ const tribunalAliases: Record<string, string> = {
 async function searchDataJudProcess(tribunal: string, processNumber: string) {
   // If no API key is configured, force demo mode for any process
   if (isDemoMode) {
-    throw new Error("Processo não encontrado");
+    throw new Error("Modo demonstração: Use 'demo-process-123' ou '0000000-00.0000.0.00.0000' para testar");
   }
 
   const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
@@ -125,7 +125,7 @@ async function advancedSearchDataJud(searchParams: any) {
   
   // If no API key is configured, force demo mode
   if (isDemoMode) {
-    throw new Error("Nenhum processo encontrado com os filtros especificados");
+    throw new Error("Modo demonstração: Use 'demo-process-123' ou 'demo' no campo de busca para testar");
   }
 
   const tribunalAlias = tribunalAliases[tribunal.toLowerCase()];
