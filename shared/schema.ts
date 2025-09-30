@@ -69,12 +69,18 @@ export const tabulatedComplementSchema = z.object({
   descricao: z.string(),
 });
 
+export const movementOrgaoJulgadorSchema = z.object({
+  codigoOrgao: z.number(),
+  nomeOrgao: z.string(),
+});
+
 export const movementSchema = z.object({
   codigo: z.number().optional(),
   nome: z.string(),
   dataHora: z.string(),
   complemento: z.string().nullable().optional(),
   complementosTabelados: z.array(tabulatedComplementSchema).optional(),
+  orgaoJulgador: movementOrgaoJulgadorSchema.optional(),
 });
 
 export const subjectSchema = z.object({
@@ -119,6 +125,7 @@ export const exportRequestSchema = z.object({
 
 export type ProcessResult = z.infer<typeof processResultSchema>;
 export type Movement = z.infer<typeof movementSchema>;
+export type MovementOrgaoJulgador = z.infer<typeof movementOrgaoJulgadorSchema>;
 export type Subject = z.infer<typeof subjectSchema>;
 export type TabulatedComplement = z.infer<typeof tabulatedComplementSchema>;
 export type BulkSearchResult = z.infer<typeof bulkSearchResultSchema>;
