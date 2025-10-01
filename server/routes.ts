@@ -1,10 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { processSearchSchema, advancedSearchSchema, bulkSearchSchema, exportRequestSchema, insertSearchHistorySchema, insertFavoriteSchema, type BulkSearchResult, type ProcessResult } from "@shared/schema";
+import { processSearchSchema, advancedSearchSchema, bulkSearchSchema, exportRequestSchema, insertSearchHistorySchema, insertFavoriteSchema, insertFollowSchema, type BulkSearchResult, type ProcessResult } from "@shared/schema";
 import { z } from "zod";
 import PDFDocument from "pdfkit";
 import { stringify } from "csv-stringify/sync";
+import * as XLSX from "xlsx";
 
 // Since we can't install busca-processos-judiciais in this environment,
 // we'll implement direct API calls to DataJud
@@ -487,6 +488,151 @@ function generateJSON(processes: ProcessResult[], includeMovements: boolean = tr
   }, null, 2);
 }
 
+function generateExcel(processes: ProcessResult[], includeMovements: boolean = true, includeSubjects: boolean = true): Buffer {
+  const workbook = XLSX.utils.book_new();
+  
+  // Main sheet with process data
+  const mainData: any[] = [];
+  
+  processes.forEach(process => {
+    const row: any = {
+      'Número do Processo': process.numeroProcesso,
+      'Classe Processual': process.classeProcessual,
+      'Código Classe': process.codigoClasseProcessual,
+      'Tribunal': process.tribunal,
+      'Órgão Julgador': process.orgaoJulgador,
+      'Código Órgão Julgador': process.codigoOrgaoJulgador || '',
+      'Grau': process.grau,
+      'Sistema': process.sistemaProcessual,
+      'Código Sistema': process.codigoSistema || '',
+      'Formato': process.formatoProcesso,
+      'Código Formato': process.codigoFormato || '',
+      'Data de Ajuizamento': new Date(process.dataAjuizamento).toLocaleDateString('pt-BR'),
+      'Última Atualização': new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR'),
+      'Nível de Sigilo': process.nivelSigilo || '',
+      'Código Município': process.codigoMunicipio || '',
+    };
+    
+    if (includeSubjects) {
+      row['Assuntos'] = process.assuntos.map(s => `${s.nome} (${s.codigo})`).join('; ');
+      row['Códigos Assuntos'] = process.assuntos.map(s => s.codigo).join('; ');
+    }
+    
+    row['Quantidade de Movimentos'] = process.movimentos.length;
+    
+    mainData.push(row);
+  });
+  
+  const mainSheet = XLSX.utils.json_to_sheet(mainData);
+  
+  // Set column widths
+  const wscols = [
+    { wch: 25 }, // Número do Processo
+    { wch: 30 }, // Classe Processual
+    { wch: 15 }, // Código Classe
+    { wch: 15 }, // Tribunal
+    { wch: 30 }, // Órgão Julgador
+    { wch: 20 }, // Código Órgão
+    { wch: 10 }, // Grau
+    { wch: 15 }, // Sistema
+    { wch: 15 }, // Código Sistema
+    { wch: 15 }, // Formato
+    { wch: 15 }, // Código Formato
+    { wch: 18 }, // Data Ajuizamento
+    { wch: 18 }, // Última Atualização
+    { wch: 15 }, // Nível Sigilo
+    { wch: 15 }, // Código Município
+    { wch: 50 }, // Assuntos
+    { wch: 30 }, // Códigos Assuntos
+    { wch: 22 }, // Quantidade Movimentos
+  ];
+  mainSheet['!cols'] = wscols;
+  
+  XLSX.utils.book_append_sheet(workbook, mainSheet, "Processos");
+  
+  // Movements sheet if requested
+  if (includeMovements) {
+    const movementsData: any[] = [];
+    
+    processes.forEach(process => {
+      process.movimentos.forEach((movement, index) => {
+        const movRow: any = {
+          'Número do Processo': process.numeroProcesso,
+          'Sequência': index + 1,
+          'Data': new Date(movement.dataHora).toLocaleDateString('pt-BR'),
+          'Hora': new Date(movement.dataHora).toLocaleTimeString('pt-BR'),
+          'Código Movimento': movement.codigo || '',
+          'Nome do Movimento': movement.nome,
+          'Complemento': movement.complemento || '',
+        };
+        
+        if (movement.orgaoJulgador) {
+          movRow['Órgão Julgador Movimento'] = movement.orgaoJulgador.nomeOrgao;
+          movRow['Código Órgão Movimento'] = movement.orgaoJulgador.codigoOrgao;
+        }
+        
+        if (movement.complementosTabelados && movement.complementosTabelados.length > 0) {
+          movRow['Complementos Tabelados'] = movement.complementosTabelados
+            .map(c => `${c.nome}: ${c.descricao} (${c.codigo}=${c.valor})`)
+            .join('; ');
+        }
+        
+        movementsData.push(movRow);
+      });
+    });
+    
+    if (movementsData.length > 0) {
+      const movSheet = XLSX.utils.json_to_sheet(movementsData);
+      
+      const movWscols = [
+        { wch: 25 }, // Número do Processo
+        { wch: 10 }, // Sequência
+        { wch: 12 }, // Data
+        { wch: 10 }, // Hora
+        { wch: 18 }, // Código Movimento
+        { wch: 40 }, // Nome do Movimento
+        { wch: 50 }, // Complemento
+        { wch: 30 }, // Órgão Julgador Movimento
+        { wch: 20 }, // Código Órgão Movimento
+        { wch: 60 }, // Complementos Tabelados
+      ];
+      movSheet['!cols'] = movWscols;
+      
+      XLSX.utils.book_append_sheet(workbook, movSheet, "Movimentações");
+    }
+  }
+  
+  // Subjects sheet if requested
+  if (includeSubjects) {
+    const subjectsData: any[] = [];
+    
+    processes.forEach(process => {
+      process.assuntos.forEach(subject => {
+        subjectsData.push({
+          'Número do Processo': process.numeroProcesso,
+          'Código Assunto': subject.codigo,
+          'Nome do Assunto': subject.nome,
+        });
+      });
+    });
+    
+    if (subjectsData.length > 0) {
+      const subjSheet = XLSX.utils.json_to_sheet(subjectsData);
+      
+      const subjWscols = [
+        { wch: 25 }, // Número do Processo
+        { wch: 15 }, // Código Assunto
+        { wch: 50 }, // Nome do Assunto
+      ];
+      subjSheet['!cols'] = subjWscols;
+      
+      XLSX.utils.book_append_sheet(workbook, subjSheet, "Assuntos");
+    }
+  }
+  
+  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Search process endpoint
@@ -801,6 +947,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.send(csvContent);
           break;
           
+        case "excel":
+          const excelBuffer = generateExcel(data, includeMovements, includeSubjects);
+          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
+          res.send(excelBuffer);
+          break;
+          
         case "json":
           const jsonContent = generateJSON(data, includeMovements, includeSubjects);
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -895,6 +1048,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         error: "Erro ao remover favorito" 
+      });
+    }
+  });
+
+  // Get follows
+  app.get("/api/follows", async (req, res) => {
+    try {
+      const follows = await storage.getFollows();
+      res.json({ success: true, data: follows });
+    } catch (error) {
+      console.error("Get follows error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Erro ao carregar acompanhamentos" 
+      });
+    }
+  });
+
+  // Add follow
+  app.post("/api/follows", async (req, res) => {
+    try {
+      const followData = insertFollowSchema.parse(req.body);
+      
+      // Check if already exists
+      const existing = await storage.getFollowByProcessNumber(followData.processNumber);
+      if (existing) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Processo já está sendo acompanhado" 
+        });
+      }
+      
+      const follow = await storage.addFollow(followData);
+      res.json({ success: true, data: follow });
+    } catch (error) {
+      console.error("Add follow error:", error);
+      res.status(400).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Erro ao adicionar acompanhamento" 
+      });
+    }
+  });
+
+  // Remove follow
+  app.delete("/api/follows/:processNumber", async (req, res) => {
+    try {
+      const { processNumber } = req.params;
+      const removed = await storage.removeFollow(processNumber);
+      
+      if (!removed) {
+        return res.status(404).json({ 
+          success: false, 
+          error: "Acompanhamento não encontrado" 
+        });
+      }
+      
+      res.json({ success: true, message: "Acompanhamento removido" });
+    } catch (error) {
+      console.error("Remove follow error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Erro ao remover acompanhamento" 
       });
     }
   });

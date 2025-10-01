@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { type ApiResponse } from "@/lib/types";
+import Papa from "papaparse";
 
 interface BulkSearchFormProps {
   onSearchSuccess: (results: BulkSearchResult[]) => void;
@@ -27,6 +28,7 @@ export default function BulkSearchForm({
 }: BulkSearchFormProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<BulkSearchRequest>({
     resolver: zodResolver(bulkSearchSchema),
@@ -88,6 +90,63 @@ export default function BulkSearchForm({
     form.setValue("processNumbers", numbers);
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione um arquivo CSV",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    Papa.parse(file, {
+      complete: (results) => {
+        const processNumbers: string[] = [];
+        
+        results.data.forEach((row: any) => {
+          if (Array.isArray(row)) {
+            row.forEach((cell) => {
+              const trimmed = String(cell).trim();
+              if (trimmed.length > 0) {
+                processNumbers.push(trimmed);
+              }
+            });
+          } else if (typeof row === 'object' && row !== null) {
+            Object.values(row).forEach((value) => {
+              const trimmed = String(value).trim();
+              if (trimmed.length > 0) {
+                processNumbers.push(trimmed);
+              }
+            });
+          }
+        });
+
+        const uniqueNumbers = Array.from(new Set(processNumbers));
+        form.setValue("processNumbers", uniqueNumbers);
+        
+        toast({
+          title: "Arquivo importado",
+          description: `${uniqueNumbers.length} números de processos carregados`,
+        });
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      },
+      error: (error) => {
+        toast({
+          title: "Erro ao processar CSV",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
   const tribunals = tribunalsData?.data || [];
 
   return (
@@ -100,7 +159,7 @@ export default function BulkSearchForm({
               Busca em Lote
             </CardTitle>
             <CardDescription>
-              Pesquise até 50 processos simultaneamente por tribunal
+              Pesquise até 1000 processos simultaneamente por tribunal
             </CardDescription>
           </div>
           <Button
@@ -174,11 +233,35 @@ export default function BulkSearchForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Números dos Processos *</FormLabel>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        data-testid="input-csv-file"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        data-testid="button-upload-csv"
+                      >
+                        <i className="fas fa-file-upload mr-2"></i>
+                        Importar CSV
+                      </Button>
+                      <span className="text-xs text-muted-foreground self-center">
+                        Ou digite manualmente abaixo
+                      </span>
+                    </div>
                     <FormControl>
                       <Textarea
-                        placeholder="Digite os números dos processos separados por quebra de linha, vírgula ou ponto e vírgula.&#10;&#10;Exemplo:&#10;0000000-00.0000.0.00.0000&#10;demo-process-1&#10;demo-process-2"
+                        placeholder="Digite os números dos processos separados por quebra de linha, vírgula ou ponto e vírgula.&#10;&#10;Exemplo:&#10;0000000-00.0000.0.00.0000&#10;1234567-89.0123.4.56.7890"
                         className="min-h-[120px] font-mono text-sm"
                         onChange={(e) => handleProcessNumbersChange(e.target.value)}
+                        value={field.value?.join('\n') || ''}
                         data-testid="textarea-process-numbers"
                       />
                     </FormControl>
@@ -190,9 +273,9 @@ export default function BulkSearchForm({
                         <Badge variant="secondary" className="mr-2">
                           {field.value.length} processos
                         </Badge>
-                        {field.value.length > 50 && (
+                        {field.value.length > 1000 && (
                           <Badge variant="destructive">
-                            Máximo: 50 processos
+                            Máximo: 1000 processos
                           </Badge>
                         )}
                       </div>
@@ -200,25 +283,6 @@ export default function BulkSearchForm({
                   </FormItem>
                 )}
               />
-
-              {/* Demo Instructions */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <i className="fas fa-info-circle text-blue-600 mt-1"></i>
-                  <div>
-                    <h4 className="font-medium text-blue-900 mb-2">Modo de Demonstração</h4>
-                    <p className="text-sm text-blue-800 mb-2">
-                      Para testar a funcionalidade, use números de processos que contenham a palavra "demo":
-                    </p>
-                    <div className="font-mono text-xs bg-blue-100 p-2 rounded border">
-                      demo-process-1<br />
-                      demo-process-2<br />
-                      demo-process-3<br />
-                      0000000-00.0000.0.00.0000
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Submit Button */}
               <Button

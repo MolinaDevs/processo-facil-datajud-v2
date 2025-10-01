@@ -1,4 +1,4 @@
-import { type SearchHistory, type InsertSearchHistory, type Favorite, type InsertFavorite, type ProcessResult } from "@shared/schema";
+import { type SearchHistory, type InsertSearchHistory, type Favorite, type InsertFavorite, type Follow, type InsertFollow, type ProcessResult } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -11,15 +11,23 @@ export interface IStorage {
   addFavorite(favorite: InsertFavorite): Promise<Favorite>;
   removeFavorite(processNumber: string): Promise<boolean>;
   getFavoriteByProcessNumber(processNumber: string): Promise<Favorite | undefined>;
+  
+  // Follows
+  getFollows(): Promise<Follow[]>;
+  addFollow(follow: InsertFollow): Promise<Follow>;
+  removeFollow(processNumber: string): Promise<boolean>;
+  getFollowByProcessNumber(processNumber: string): Promise<Follow | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private searchHistory: Map<string, SearchHistory>;
   private favorites: Map<string, Favorite>;
+  private follows: Map<string, Follow>;
 
   constructor() {
     this.searchHistory = new Map();
     this.favorites = new Map();
+    this.follows = new Map();
   }
 
   async getSearchHistory(): Promise<SearchHistory[]> {
@@ -62,6 +70,30 @@ export class MemStorage implements IStorage {
 
   async getFavoriteByProcessNumber(processNumber: string): Promise<Favorite | undefined> {
     return this.favorites.get(processNumber);
+  }
+
+  async getFollows(): Promise<Follow[]> {
+    return Array.from(this.follows.values())
+      .sort((a, b) => new Date(b.addedAt!).getTime() - new Date(a.addedAt!).getTime());
+  }
+
+  async addFollow(insertFollow: InsertFollow): Promise<Follow> {
+    const id = randomUUID();
+    const follow: Follow = {
+      ...insertFollow,
+      id,
+      addedAt: new Date(),
+    };
+    this.follows.set(insertFollow.processNumber, follow);
+    return follow;
+  }
+
+  async removeFollow(processNumber: string): Promise<boolean> {
+    return this.follows.delete(processNumber);
+  }
+
+  async getFollowByProcessNumber(processNumber: string): Promise<Follow | undefined> {
+    return this.follows.get(processNumber);
   }
 }
 

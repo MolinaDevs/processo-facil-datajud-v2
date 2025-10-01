@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useMutation } from "@tanstack/react-query";
 import { type BulkSearchResult } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import ExportDialog from "./export-dialog";
 
 interface BulkSearchResultsProps {
@@ -18,6 +21,87 @@ export default function BulkSearchResults({ results, onProcessSelect }: BulkSear
   const [currentPage, setCurrentPage] = useState(1);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const resultsPerPage = 10;
+  const { toast } = useToast();
+  
+  const favoriteAllMutation = useMutation({
+    mutationFn: async () => {
+      const successResults = results.filter(r => r.status === "success" && r.result);
+      let added = 0;
+      let skipped = 0;
+      
+      for (const result of successResults) {
+        try {
+          await apiRequest("POST", "/api/favorites", {
+            processNumber: result.processNumber,
+            tribunal: result.result!.tribunal,
+            processData: result.result,
+          });
+          added++;
+        } catch (error: any) {
+          // Skip if already favorited
+          if (error?.message?.includes("já está nos favoritos")) {
+            skipped++;
+          }
+        }
+      }
+      
+      return { added, skipped };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Processos favoritados",
+        description: `${data.added} processos adicionados aos favoritos${data.skipped > 0 ? `, ${data.skipped} já estavam` : ''}`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao favoritar",
+        description: "Não foi possível adicionar os processos aos favoritos",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const followAllMutation = useMutation({
+    mutationFn: async () => {
+      const successResults = results.filter(r => r.status === "success" && r.result);
+      let added = 0;
+      let skipped = 0;
+      
+      for (const result of successResults) {
+        try {
+          await apiRequest("POST", "/api/follows", {
+            processNumber: result.processNumber,
+            tribunal: result.result!.tribunal,
+            processData: result.result,
+          });
+          added++;
+        } catch (error: any) {
+          // Skip if already following
+          if (error?.message?.includes("já está sendo acompanhado")) {
+            skipped++;
+          }
+        }
+      }
+      
+      return { added, skipped };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/follows"] });
+      toast({
+        title: "Acompanhamento ativado",
+        description: `${data.added} processos adicionados ao acompanhamento${data.skipped > 0 ? `, ${data.skipped} já estavam` : ''}`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro no acompanhamento",
+        description: "Não foi possível adicionar os processos ao acompanhamento",
+        variant: "destructive",
+      });
+    },
+  });
   
   // Categorize results
   const successResults = results.filter(r => r.status === "success");
@@ -277,15 +361,37 @@ export default function BulkSearchResults({ results, onProcessSelect }: BulkSear
               </CardDescription>
             </div>
             {successResults.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsExportDialogOpen(true)}
-                data-testid="button-export-bulk-results"
-              >
-                <i className="fas fa-download mr-2"></i>
-                Exportar Resultados
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => favoriteAllMutation.mutate()}
+                  disabled={favoriteAllMutation.isPending}
+                  data-testid="button-favorite-all"
+                >
+                  <i className="fas fa-heart mr-2"></i>
+                  {favoriteAllMutation.isPending ? "Favoritando..." : "Favoritar Todos"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => followAllMutation.mutate()}
+                  disabled={followAllMutation.isPending}
+                  data-testid="button-follow-all"
+                >
+                  <i className="fas fa-bell mr-2"></i>
+                  {followAllMutation.isPending ? "Acompanhando..." : "Acompanhar Todos"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsExportDialogOpen(true)}
+                  data-testid="button-export-bulk-results"
+                >
+                  <i className="fas fa-download mr-2"></i>
+                  Exportar
+                </Button>
+              </div>
             )}
           </div>
         </CardHeader>

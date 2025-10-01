@@ -96,8 +96,7 @@ export default function AdvancedSearchForm({
     "Ação de Execução",
     "Ação Declaratória",
     "Busca e Apreensão",
-    "Mandado de Segurança",
-    "Demo" // For testing
+    "Mandado de Segurança"
   ];
 
   const commonJudgingBodies = [
@@ -247,7 +246,7 @@ export default function AdvancedSearchForm({
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="Ex: responsabilidade civil, demo"
+                          placeholder="Ex: responsabilidade civil, danos morais"
                           data-testid="input-search-term"
                         />
                       </FormControl>

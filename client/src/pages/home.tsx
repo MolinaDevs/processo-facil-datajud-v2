@@ -236,8 +236,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Como buscar um processo?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Digite o número do processo no formato CNJ (ex: 0000000-00.0000.0.00.0000) e selecione o tribunal. 
-                      Para testar, use "demo-process-123" ou "0000000-00.0000.0.00.0000".
+                      Digite o número do processo no formato CNJ (ex: 0000000-00.0000.0.00.0000) e selecione o tribunal correspondente para realizar a consulta.
                     </p>
                   </div>
 
@@ -252,14 +251,14 @@ export default function Home() {
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Como funciona a busca em lote?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Insira múltiplos números de processo (um por linha, máximo 50) para buscar vários processos de uma vez.
+                      Insira múltiplos números de processo (um por linha, máximo 1000) ou importe um arquivo CSV para buscar vários processos simultaneamente.
                     </p>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Posso exportar os dados?</h3>
                     <p className="text-sm text-muted-foreground">
-                      Sim! Clique no botão de exportar nos resultados para baixar em PDF, CSV ou JSON.
+                      Sim! Clique no botão de exportar nos resultados para baixar em PDF, Excel, CSV ou JSON.
                     </p>
                   </div>
 

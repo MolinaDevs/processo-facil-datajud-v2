@@ -91,13 +91,15 @@ export default function ExportDialog({
 
   const formatLabels = {
     pdf: "PDF - Relatório detalhado",
+    excel: "Excel - Planilha Excel",
     csv: "CSV - Planilha de dados",
     json: "JSON - Dados estruturados",
   };
 
   const formatDescriptions = {
     pdf: "Formato ideal para relatórios completos e impressão",
-    csv: "Formato compatível com Excel e outras planilhas",
+    excel: "Formato Excel com múltiplas abas e colunas organizadas",
+    csv: "Formato compatível com editores de planilha simples",
     json: "Formato técnico para integração com sistemas",
   };
 

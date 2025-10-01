@@ -19,6 +19,14 @@ export const favorites = pgTable("favorites", {
   processData: jsonb("process_data").notNull(),
 });
 
+export const follows = pgTable("follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  processNumber: text("process_number").notNull().unique(),
+  tribunal: text("tribunal").notNull(),
+  addedAt: timestamp("added_at").defaultNow().notNull(),
+  processData: jsonb("process_data").notNull(),
+});
+
 export const insertSearchHistorySchema = createInsertSchema(searchHistory).pick({
   processNumber: true,
   tribunal: true,
@@ -31,10 +39,18 @@ export const insertFavoriteSchema = createInsertSchema(favorites).pick({
   processData: true,
 });
 
+export const insertFollowSchema = createInsertSchema(follows).pick({
+  processNumber: true,
+  tribunal: true,
+  processData: true,
+});
+
 export type InsertSearchHistory = z.infer<typeof insertSearchHistorySchema>;
 export type SearchHistory = typeof searchHistory.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+export type InsertFollow = z.infer<typeof insertFollowSchema>;
+export type Follow = typeof follows.$inferSelect;
 
 // Process data types based on busca-processos-judiciais
 export const processSearchSchema = z.object({
