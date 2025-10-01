@@ -55,7 +55,7 @@ export const bulkSearchSchema = z.object({
   tribunal: z.string().min(1, "Tribunal é obrigatório"),
   processNumbers: z.array(z.string().min(1, "Número do processo não pode estar vazio"))
     .min(1, "Pelo menos um número de processo é obrigatório")
-    .max(50, "Máximo de 50 processos por busca"),
+    .max(1000, "Máximo de 1000 processos por busca"),
 });
 
 export type ProcessSearchRequest = z.infer<typeof processSearchSchema>;
@@ -116,7 +116,7 @@ export const bulkSearchResultSchema = z.object({
 });
 
 export const exportRequestSchema = z.object({
-  format: z.enum(["pdf", "csv", "json"]),
+  format: z.enum(["pdf", "csv", "json", "excel"]),
   data: z.array(processResultSchema),
   title: z.string().optional(),
   includeMovements: z.boolean().default(true),
