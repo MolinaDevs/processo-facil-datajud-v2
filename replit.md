@@ -2,7 +2,15 @@
 
 This is a Brazilian legal process lookup application that allows users to search for judicial processes through the DataJud CNJ API. The application provides a modern web interface for searching court cases, viewing process details, managing search history, and maintaining a favorites list. It features real-time process information retrieval from various Brazilian courts including superior courts (STJ, STF, TST), federal courts (TRF1-6), and state courts (TJSP, TJRJ, etc.).
 
-## Recent Updates (September 30, 2025)
+## Recent Updates (October 1, 2025)
+- **CSV Upload for Bulk Search**: Users can now upload CSV files containing process numbers for batch searches with automatic deduplication
+- **Increased Bulk Capacity**: Bulk search limit increased from 50 to 1000 processes per operation
+- **Excel Export**: Added Excel export functionality alongside existing PDF, CSV, and JSON formats using SheetJS (xlsx) library
+- **Batch Operations**: Implemented "Favoritar Todos" and "Acompanhar Todos" buttons with real backend persistence
+- **Follow System**: Complete follow/tracking system with dedicated storage layer, REST API routes, and mutation-based frontend integration
+- **Demo Content Removed**: Cleaned up all placeholder and demo text from UI to provide production-ready interface
+
+## Previous Updates (September 30, 2025)
 - **Fixed Navigation**: Header menu (Buscar, Histórico, Favoritos, Ajuda) now properly switches between sections
 - **Enhanced User Feedback**: "Criar Alerta" and "Acompanhar" buttons now provide toast notifications to users
 - **Improved State Persistence**: Active section state is preserved when selecting processes from history or favorites
@@ -40,6 +48,7 @@ Preferred communication style: Simple, everyday language.
 ## Core Data Models
 - **Search History**: Tracks user searches with process numbers, tribunals, and result data
 - **Favorites**: Persistent storage of favorited processes with full process metadata
+- **Follows**: Tracks processes users want to monitor for updates with full process metadata
 - **Process Results**: Structured data from DataJud API including movements, parties, and case details
 
 ## Authentication and Authorization
@@ -67,6 +76,9 @@ Preferred communication style: Simple, everyday language.
 - **Validation**: Zod for runtime type validation and schema definition
 - **HTTP Client**: Native fetch API with custom wrapper for type safety
 - **Date Handling**: date-fns with Portuguese Brazil locale support
+- **CSV Processing**: Papaparse for CSV parsing and upload
+- **Excel Generation**: SheetJS (xlsx) for Excel export functionality
+- **PDF Generation**: PDFKit for creating PDF reports
 
 ## Development Tools
 - **Replit Integration**: Vite plugins for Replit development environment

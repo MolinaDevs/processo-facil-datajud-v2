@@ -22,6 +22,54 @@ export default function BulkSearchResults({ results, onProcessSelect }: BulkSear
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const resultsPerPage = 10;
   const { toast } = useToast();
+
+  const favoriteMutation = useMutation({
+    mutationFn: async ({ processNumber, tribunal, processData }: { processNumber: string; tribunal: string; processData: any }) => {
+      return await apiRequest("POST", "/api/favorites", {
+        processNumber,
+        tribunal,
+        processData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Processo favoritado",
+        description: "Processo adicionado aos favoritos com sucesso",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao favoritar",
+        description: error?.message || "Não foi possível adicionar o processo aos favoritos",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const followMutation = useMutation({
+    mutationFn: async ({ processNumber, tribunal, processData }: { processNumber: string; tribunal: string; processData: any }) => {
+      return await apiRequest("POST", "/api/follows", {
+        processNumber,
+        tribunal,
+        processData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/follows"] });
+      toast({
+        title: "Processo adicionado ao acompanhamento",
+        description: "Você receberá atualizações sobre este processo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao acompanhar",
+        description: error?.message || "Não foi possível adicionar o processo ao acompanhamento",
+        variant: "destructive",
+      });
+    },
+  });
   
   const favoriteAllMutation = useMutation({
     mutationFn: async () => {
@@ -226,10 +274,46 @@ export default function BulkSearchResults({ results, onProcessSelect }: BulkSear
                   <span>•</span>
                   <span>Formato: {result.result?.formatoProcesso}</span>
                 </div>
-                <Button variant="ghost" size="sm">
-                  Ver Detalhes
-                  <i className="fas fa-arrow-right ml-2"></i>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      favoriteMutation.mutate({
+                        processNumber: result.processNumber,
+                        tribunal: result.result!.tribunal,
+                        processData: result.result,
+                      });
+                    }}
+                    disabled={favoriteMutation.isPending}
+                    data-testid={`button-favorite-${index}`}
+                  >
+                    <i className="fas fa-heart mr-1"></i>
+                    Favoritar
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      followMutation.mutate({
+                        processNumber: result.processNumber,
+                        tribunal: result.result!.tribunal,
+                        processData: result.result,
+                      });
+                    }}
+                    disabled={followMutation.isPending}
+                    data-testid={`button-follow-${index}`}
+                  >
+                    <i className="fas fa-bell mr-1"></i>
+                    Acompanhar
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    Ver Detalhes
+                    <i className="fas fa-arrow-right ml-2"></i>
+                  </Button>
+                </div>
               </div>
             </div>
             
