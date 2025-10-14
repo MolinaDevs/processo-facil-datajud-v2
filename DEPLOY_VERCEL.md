@@ -25,7 +25,7 @@ Na tela de configuração:
 - **Framework Preset:** `Other` (deixe em branco)
 - **Root Directory:** `./` (raiz do projeto)
 - **Build Command:** `npm run build`
-- **Output Directory:** `dist/client`
+- **Output Directory:** `dist/public`
 - **Install Command:** `npm install`
 
 ### 3. Configurar Variáveis de Ambiente
