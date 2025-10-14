@@ -4,6 +4,21 @@ import { registerRoutes } from "../server/routes";
 
 const app = express();
 
+// Fix Vercel path rewriting - restore original URL
+app.use((req, _res, next) => {
+  if (process.env.VERCEL) {
+    const originalPath = req.headers['x-vercel-forwarded-for-path'] as string || 
+                        req.headers['x-forwarded-uri'] as string ||
+                        req.headers['x-vercel-matched-path'] as string;
+    
+    if (originalPath) {
+      req.url = originalPath;
+      req.originalUrl = originalPath;
+    }
+  }
+  next();
+});
+
 // CORS middleware
 app.use(cors({
   origin: '*',

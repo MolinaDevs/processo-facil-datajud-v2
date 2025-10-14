@@ -1,0 +1,42 @@
+20:15:17.376 Running build in Washington, D.C., USA (East) – iad1
+20:15:17.377 Build machine configuration: 2 cores, 8 GB
+20:15:17.409 Cloning github.com/MolinaDevs/processo-facil-datajud (Branch: main, Commit: 497fc5c)
+20:15:18.167 Cloning completed: 757.000ms
+20:15:18.255 Restored build cache from previous deployment (51Y7VfvX6XdsXuj7kSRMo8WZ4qsf)
+20:15:18.759 Running "vercel build"
+20:15:19.147 Vercel CLI 48.2.9
+20:15:19.886 Installing dependencies...
+20:15:21.236 
+20:15:21.237 up to date in 1s
+20:15:21.237 
+20:15:21.238 65 packages are looking for funding
+20:15:21.238   run `npm fund` for details
+20:15:21.289 Building frontend with Vite...
+20:15:21.577 [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+20:15:21.630 transforming...
+20:15:21.954 Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+20:15:21.954   npx update-browserslist-db@latest
+20:15:21.955   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+20:15:27.385 [32m✓[39m 2663 modules transformed.
+20:15:27.784 rendering chunks...
+20:15:27.802 computing gzip size...
+20:15:27.821 [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m  1.95 kB[22m[1m[22m[2m │ gzip:   0.74 kB[22m
+20:15:27.821 [2m../dist/public/[22m[2massets/[22m[35mindex-BMTB1v4M.css  [39m[1m[2m 61.47 kB[22m[1m[22m[2m │ gzip:  10.99 kB[22m
+20:15:27.830 [2m../dist/public/[22m[2massets/[22m[36mindex-B_d4PwGe.js   [39m[1m[33m560.44 kB[39m[22m[2m │ gzip: 169.77 kB[22m
+20:15:27.830 [33m
+20:15:27.830 (!) Some chunks are larger than 500 kB after minification. Consider:
+20:15:27.831 - Using dynamic import() to code-split the application
+20:15:27.831 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+20:15:27.831 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+20:15:27.831 [32m✓ built in 6.22s[39m
+20:15:27.858 Build completed successfully!
+20:15:27.858 Frontend: dist/public
+20:15:27.860 API: api/index.ts (Vercel will compile automatically)
+20:15:28.101 Using TypeScript 5.6.3 (local user-provided)
+20:15:36.293 Build Completed in /vercel/output [16s]
+20:15:36.477 Deploying outputs...
+20:15:40.726 Deployment completed
+20:15:41.566 Creating build cache...
+20:15:59.664 Created build cache: 18.099s
+20:15:59.666 Uploading build cache [88.04 MB]
+20:16:00.862 Build cache uploaded: 1.196s

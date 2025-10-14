@@ -69,6 +69,10 @@ NODE_ENV=production
 
 - ✅ API serverless usa TypeScript nativo do Vercel
 - ✅ Removido `api/index.js` para evitar conflito de arquivos
+- ✅ **CRITICAL FIX:** Middleware adicionado para restaurar caminho original das rotas
+  - Vercel reescreve `/api/tribunals` → `/api/index` 
+  - Middleware restaura o path usando headers do Vercel
+  - Agora Express consegue rotear corretamente
 - ✅ Rota `/api/tribunals` funcionará corretamente
 - ✅ CORS configurado com pacote `cors`
 - ✅ Script de build simplificado (apenas frontend)
