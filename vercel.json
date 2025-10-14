@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "chmod +x build-vercel.sh && ./build-vercel.sh",
   "outputDirectory": "dist/public",
   "rewrites": [
     {
