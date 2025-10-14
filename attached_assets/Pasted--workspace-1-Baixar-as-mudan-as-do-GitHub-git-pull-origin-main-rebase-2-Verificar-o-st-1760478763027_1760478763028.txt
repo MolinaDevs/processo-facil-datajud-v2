@@ -1,0 +1,142 @@
+~/workspace$ # 1. Baixar as mudanças do GitHub
+git pull origin main --rebase
+
+# 2. Verificar o status
+git status
+
+# 3. Agora fazer o push
+git push origin main
+remote: Enumerating objects: 566, done.
+remote: Counting objects: 100% (93/93), done.
+remote: Compressing objects: 100% (62/62), done.
+remote: Total 566 (delta 50), reused 66 (delta 30), pack-reused 473 (from 1)
+Receiving objects: 100% (566/566), 298.16 KiB | 5.73 MiB/s, done.
+Resolving deltas: 100% (340/340), done.
+From https://github.com/MolinaDevs/processo-facil-datajud
+ * branch            main       -> FETCH_HEAD
+ * [new branch]      main       -> origin/main
+Auto-merging .gitignore
+CONFLICT (add/add): Merge conflict in .gitignore
+Auto-merging components.json
+CONFLICT (add/add): Merge conflict in components.json
+Auto-merging package-lock.json
+CONFLICT (add/add): Merge conflict in package-lock.json
+Auto-merging package.json
+CONFLICT (add/add): Merge conflict in package.json
+Auto-merging tailwind.config.ts
+CONFLICT (add/add): Merge conflict in tailwind.config.ts
+Auto-merging tsconfig.json
+CONFLICT (add/add): Merge conflict in tsconfig.json
+Auto-merging vite.config.ts
+CONFLICT (add/add): Merge conflict in vite.config.ts
+error: could not apply a00014b... Implement core UI components and layout for the judicial process search platform
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply a00014b... Implement core UI components and layout for the judicial process search platform
+interactive rebase in progress; onto 37535f1
+Last commands done (2 commands done):
+   pick 398b747 Initial commit # empty
+   pick a00014b Implement core UI components and layout for the judicial process search platform
+Next commands to do (19 remaining commands):
+   pick 24f4040 Improve DataJud search by cleaning process numbers and adding demo functionality
+   pick f2689e7 Add advanced search functionality for judicial processes and display results
+  (use "git rebase --edit-todo" to view and edit)
+You are currently rebasing branch 'main' on '37535f1'.
+  (fix conflicts and then run "git rebase --continue")
+  (use "git rebase --skip" to skip this patch)
+  (use "git rebase --abort" to check out the original branch)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+    new file:   .replit
+    new file:   attached_assets/processo-facil-datajud-main_1759178861593.zip
+    new file:   client/index.html
+    new file:   client/src/App.tsx
+    new file:   client/src/components/process-results.tsx
+    new file:   client/src/components/process-search-form.tsx
+    new file:   client/src/components/process-timeline.tsx
+    new file:   client/src/components/search-history.tsx
+    new file:   client/src/components/ui/accordion.tsx
+    new file:   client/src/components/ui/alert-dialog.tsx
+    new file:   client/src/components/ui/alert.tsx
+    new file:   client/src/components/ui/aspect-ratio.tsx
+    new file:   client/src/components/ui/avatar.tsx
+    new file:   client/src/components/ui/badge.tsx
+    new file:   client/src/components/ui/breadcrumb.tsx
+    new file:   client/src/components/ui/button.tsx
+    new file:   client/src/components/ui/calendar.tsx
+    new file:   client/src/components/ui/card.tsx
+    new file:   client/src/components/ui/carousel.tsx
+    new file:   client/src/components/ui/chart.tsx
+    new file:   client/src/components/ui/checkbox.tsx
+    new file:   client/src/components/ui/collapsible.tsx
+    new file:   client/src/components/ui/command.tsx
+    new file:   client/src/components/ui/context-menu.tsx
+    new file:   client/src/components/ui/dialog.tsx
+    new file:   client/src/components/ui/drawer.tsx
+    new file:   client/src/components/ui/dropdown-menu.tsx
+    new file:   client/src/components/ui/form.tsx
+    new file:   client/src/components/ui/hover-card.tsx
+    new file:   client/src/components/ui/input-otp.tsx
+    new file:   client/src/components/ui/input.tsx
+    new file:   client/src/components/ui/label.tsx
+    new file:   client/src/components/ui/menubar.tsx
+    new file:   client/src/components/ui/navigation-menu.tsx
+    new file:   client/src/components/ui/pagination.tsx
+    new file:   client/src/components/ui/popover.tsx
+    new file:   client/src/components/ui/progress.tsx
+    new file:   client/src/components/ui/radio-group.tsx
+    new file:   client/src/components/ui/resizable.tsx
+    new file:   client/src/components/ui/scroll-area.tsx
+    new file:   client/src/components/ui/select.tsx
+    new file:   client/src/components/ui/separator.tsx
+    new file:   client/src/components/ui/sheet.tsx
+    new file:   client/src/components/ui/sidebar.tsx
+    new file:   client/src/components/ui/skeleton.tsx
+    new file:   client/src/components/ui/slider.tsx
+    new file:   client/src/components/ui/switch.tsx
+    new file:   client/src/components/ui/table.tsx
+    new file:   client/src/components/ui/tabs.tsx
+    new file:   client/src/components/ui/textarea.tsx
+    new file:   client/src/components/ui/toast.tsx
+    new file:   client/src/components/ui/toaster.tsx
+    new file:   client/src/components/ui/toggle-group.tsx
+    new file:   client/src/components/ui/toggle.tsx
+    new file:   client/src/components/ui/tooltip.tsx
+    new file:   client/src/hooks/use-mobile.tsx
+    new file:   client/src/hooks/use-toast.ts
+    new file:   client/src/index.css
+    new file:   client/src/lib/queryClient.ts
+    new file:   client/src/lib/types.ts
+    new file:   client/src/lib/utils.ts
+    new file:   client/src/main.tsx
+    new file:   client/src/pages/home.tsx
+    new file:   client/src/pages/not-found.tsx
+    new file:   drizzle.config.ts
+    new file:   server/index.ts
+    new file:   server/routes.ts
+    new file:   server/storage.ts
+    new file:   server/vite.ts
+    new file:   shared/schema.ts
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add <file>..." to mark resolution)
+    both added:      .gitignore
+    both added:      components.json
+    both added:      package-lock.json
+    both added:      package.json
+    both added:      tailwind.config.ts
+    both added:      tsconfig.json
+    both added:      vite.config.ts
+
+To https://github.com/MolinaDevs/processo-facil-datajud.git
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'https://github.com/MolinaDevs/processo-facil-datajud.git'
+hint: Updates were rejected because a pushed branch tip is behind its remote
+hint: counterpart. If you want to integrate the remote changes, use 'git pull'
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
