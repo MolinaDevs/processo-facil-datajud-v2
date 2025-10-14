@@ -4,18 +4,19 @@ import { registerRoutes } from "../server/routes";
 
 const app = express();
 
-// Fix Vercel path rewriting - restore original URL
+// Fix Vercel path rewriting - restore original URL from query param
 app.use((req, _res, next) => {
-  if (process.env.VERCEL) {
-    const originalPath = req.headers['x-vercel-forwarded-for-path'] as string || 
-                        req.headers['x-forwarded-uri'] as string ||
-                        req.headers['x-vercel-matched-path'] as string;
-    
-    if (originalPath) {
-      req.url = originalPath;
-      req.originalUrl = originalPath;
-    }
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const vercelPath = url.searchParams.get('__vercel_path');
+  
+  if (vercelPath) {
+    // Remove the query parameter and use the original path
+    url.searchParams.delete('__vercel_path');
+    const cleanQuery = url.search;
+    req.url = vercelPath + cleanQuery;
+    req.originalUrl = vercelPath + cleanQuery;
   }
+  
   next();
 });
 
