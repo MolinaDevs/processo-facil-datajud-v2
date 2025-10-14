@@ -398,10 +398,10 @@ function generatePDF(processes: ProcessResult[], title: string = "Relatório de 
 }
 
 function generateCSV(processes: ProcessResult[], includeMovements: boolean = true, includeSubjects: boolean = true): string {
-  const records: any[] = [];
+  const records: Record<string, any>[] = [];
   
   processes.forEach(process => {
-    const baseRecord = {
+    const baseRecord: Record<string, any> = {
       'Número do Processo': process.numeroProcesso,
       'Classe Processual': process.classeProcessual,
       'Tribunal': process.tribunal,
@@ -419,7 +419,7 @@ function generateCSV(processes: ProcessResult[], includeMovements: boolean = tru
     
     if (includeMovements && process.movimentos.length > 0) {
       process.movimentos.forEach((movement, index) => {
-        const record = { ...baseRecord };
+        const record: Record<string, any> = { ...baseRecord };
         if (index === 0) {
           // First movement includes all process data
         } else {
@@ -447,8 +447,8 @@ function generateCSV(processes: ProcessResult[], includeMovements: boolean = tru
     header: true,
     delimiter: ',',
     quoted: true,
-    quotedEmpty: true,
-    encodeBOM: true
+    quoted_empty: true,
+    bom: true
   });
 }
 
