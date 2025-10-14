@@ -1,29 +1,28 @@
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// Import compiled routes
+let routes;
+try {
+  routes = await import('../dist/routes.js');
+} catch (error) {
+  console.error('Error loading routes:', error);
+  // Fallback routes
+  app.get('/api', (req, res) => {
+    res.json({ status: 'error', message: 'Routes not loaded properly' });
+  });
+}
 
-// Health check
-app.get('/api', (req, res) => {
-  res.json({ status: 'ok', message: 'API is running' });
-});
+if (routes && routes.registerRoutes) {
+  routes.registerRoutes(app);
+}
 
-// Import and use routes
-// Note: In Vercel, you'll need to inline your routes or import them differently
-// For now, this is a basic structure
-
+// Export for Vercel
 export default app;
