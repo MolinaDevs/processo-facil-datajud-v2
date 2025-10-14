@@ -12,9 +12,9 @@ Foi criado o arquivo `build-vercel.sh` que compila corretamente:
 - Frontend: `vite build` → `dist/public`
 - API serverless: `esbuild api/index.ts` → `api/index.js`
 
-### 2. Arquivo `api/index.js` Gerado
+### 2. TypeScript Nativo no Vercel
 
-O arquivo bundled já foi gerado e contém todo o código necessário (Express + Routes + Storage).
+O Vercel compila automaticamente arquivos `.ts` em serverless functions, então mantemos apenas `api/index.ts`.
 
 ## 📤 Passos para Deploy
 
@@ -30,14 +30,11 @@ chmod +x build-vercel.sh
 # Adicionar o build script
 git add build-vercel.sh
 
-# Adicionar o arquivo bundled da API
-git add api/index.js
+# Remover api/index.js (causa conflito)
+git rm api/index.js
 
-# Adicionar este arquivo de documentação
-git add VERCEL_BUILD_FIX.md
-
-# Adicionar api/index.ts atualizado
-git add api/index.ts
+# Adicionar arquivos atualizados
+git add api/index.ts VERCEL_BUILD_FIX.md vercel.json
 ```
 
 ### 3. Fazer commit
@@ -70,11 +67,11 @@ NODE_ENV=production
 
 ## 🎯 O que foi corrigido
 
-- ✅ API serverless agora compila corretamente
-- ✅ Arquivo `api/index.js` bundled contém todas as rotas
+- ✅ API serverless usa TypeScript nativo do Vercel
+- ✅ Removido `api/index.js` para evitar conflito de arquivos
 - ✅ Rota `/api/tribunals` funcionará corretamente
 - ✅ CORS configurado com pacote `cors`
-- ✅ Script de build automatizado
+- ✅ Script de build simplificado (apenas frontend)
 
 ## 🔍 Verificação
 
