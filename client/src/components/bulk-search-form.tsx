@@ -87,7 +87,7 @@ export default function BulkSearchForm({
 
   const handleProcessNumbersChange = (text: string) => {
     const numbers = parseProcessNumbers(text);
-    form.setValue("processNumbers", numbers);
+    form.setValue("processNumbers", numbers, { shouldValidate: true });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,7 +126,7 @@ export default function BulkSearchForm({
         });
 
         const uniqueNumbers = Array.from(new Set(processNumbers));
-        form.setValue("processNumbers", uniqueNumbers);
+        form.setValue("processNumbers", uniqueNumbers, { shouldValidate: true });
         
         toast({
           title: "Arquivo importado",
