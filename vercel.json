@@ -1,12 +1,6 @@
 {
   "buildCommand": "chmod +x build-vercel.sh && ./build-vercel.sh",
   "outputDirectory": "dist/public",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index?__vercel_path=/api/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",

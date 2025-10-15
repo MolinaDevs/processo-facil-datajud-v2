@@ -1,0 +1,28 @@
+import express, { type Request, Response } from "express";
+import cors from "cors";
+import { registerRoutes } from "./routes";
+
+const app = express();
+
+// CORS middleware
+app.use(cors({
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Register all routes
+registerRoutes(app);
+
+// Error handler
+app.use((err: any, _req: Request, res: Response, _next: any) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+});
+
+export default app;

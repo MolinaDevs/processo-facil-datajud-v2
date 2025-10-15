@@ -45,6 +45,7 @@
     "@types/cors": "^2.8.19",
     "@types/papaparse": "^5.3.16",
     "@types/pdfkit": "^0.17.3",
+    "@vercel/node": "^5.3.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
