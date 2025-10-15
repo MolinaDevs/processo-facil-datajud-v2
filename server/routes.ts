@@ -333,114 +333,157 @@ async function bulkSearchDataJud(tribunal: string, processNumbers: string[]): Pr
 }
 
 // Export utility functions
-function generatePDF(processes: ProcessResult[], title: string = "Relatório de Processos", includeMovements: boolean = true, includeSubjects: boolean = true): Buffer {
-  const doc = new PDFDocument({ 
-    margins: { top: 50, bottom: 50, left: 50, right: 50 },
-    size: 'A4'
-  });
+function formatDateSafely(dateValue: string | Date, format: 'date' | 'time' | 'datetime' = 'date'): string {
+  if (!dateValue) return '';
   
-  const buffers: Buffer[] = [];
-  doc.on('data', buffers.push.bind(buffers));
+  // List of known sentinel values that should be returned as-is
+  const sentinelValues = ['Não informado', 'N/A', 'n/a', 'não disponível'];
   
-  // Header
-  doc.fontSize(16).font('Helvetica-Bold').text(title, { align: 'center' });
-  doc.fontSize(10).text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, { align: 'center' });
-  doc.moveDown(2);
+  // If it's a known sentinel string, return as is
+  if (typeof dateValue === 'string' && sentinelValues.some(s => dateValue.toLowerCase() === s.toLowerCase())) {
+    return dateValue;
+  }
   
-  processes.forEach((process, index) => {
-    if (index > 0) {
-      doc.addPage();
+  try {
+    const date = new Date(dateValue);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      // If parsing failed, return the original string if it was a string
+      return typeof dateValue === 'string' ? dateValue : '';
     }
     
-    // Process Header
-    doc.fontSize(14).font('Helvetica-Bold').text(`Processo: ${process.numeroProcesso}`);
-    doc.moveDown(0.5);
-    
-    // Basic Information
-    doc.fontSize(10).font('Helvetica');
-    doc.text(`Classe Processual: ${process.classeProcessual}`);
-    doc.text(`Tribunal: ${process.tribunal}`);
-    doc.text(`Órgão Julgador: ${process.orgaoJulgador}`);
-    doc.text(`Grau: ${process.grau}`);
-    doc.text(`Sistema: ${process.sistemaProcessual} (${process.formatoProcesso})`);
-    doc.text(`Data de Ajuizamento: ${new Date(process.dataAjuizamento).toLocaleDateString('pt-BR')}`);
-    doc.text(`Última Atualização: ${new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR')}`);
-    doc.moveDown(1);
-    
-    // Subjects
-    if (includeSubjects && process.assuntos.length > 0) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Assuntos:');
-      doc.fontSize(10).font('Helvetica');
-      process.assuntos.forEach(subject => {
-        doc.text(`• ${subject.nome} (${subject.codigo})`);
-      });
-      doc.moveDown(1);
+    if (format === 'date') {
+      return date.toLocaleDateString('pt-BR');
+    } else if (format === 'time') {
+      return date.toLocaleTimeString('pt-BR');
+    } else {
+      return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR')}`;
     }
+  } catch {
+    // If any error occurs, return the original string value
+    return typeof dateValue === 'string' ? dateValue : '';
+  }
+}
+
+async function generatePDF(processes: ProcessResult[], title: string = "Relatório de Processos", includeMovements: boolean = true, includeSubjects: boolean = true): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ 
+      margins: { top: 50, bottom: 50, left: 50, right: 50 },
+      size: 'A4'
+    });
     
-    // Movements
-    if (includeMovements && process.movimentos.length > 0) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Movimentações:');
-      doc.fontSize(10).font('Helvetica');
-      process.movimentos.forEach(movement => {
-        const date = new Date(movement.dataHora).toLocaleDateString('pt-BR');
-        const time = new Date(movement.dataHora).toLocaleTimeString('pt-BR');
-        doc.text(`• ${date} ${time} - ${movement.nome}`);
-        if (movement.complemento) {
-          doc.text(`  ${movement.complemento}`);
+    const buffers: Buffer[] = [];
+    doc.on('data', (chunk) => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+    
+    try {
+      // Header
+      doc.fontSize(16).font('Helvetica-Bold').text(title, { align: 'center' });
+      doc.fontSize(10).text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, { align: 'center' });
+      doc.moveDown(2);
+      
+      processes.forEach((process, index) => {
+        if (index > 0) {
+          doc.addPage();
+        }
+        
+        // Process Header
+        doc.fontSize(14).font('Helvetica-Bold').text(`Processo: ${process.numeroProcesso}`);
+        doc.moveDown(0.5);
+        
+        // Basic Information
+        doc.fontSize(10).font('Helvetica');
+        doc.text(`Classe Processual: ${process.classeProcessual}`);
+        doc.text(`Tribunal: ${process.tribunal}`);
+        doc.text(`Órgão Julgador: ${process.orgaoJulgador}`);
+        doc.text(`Grau: ${process.grau}`);
+        doc.text(`Sistema: ${process.sistemaProcessual} (${process.formatoProcesso})`);
+        doc.text(`Data de Ajuizamento: ${formatDateSafely(process.dataAjuizamento)}`);
+        doc.text(`Última Atualização: ${formatDateSafely(process.ultimaAtualizacao)}`);
+        doc.moveDown(1);
+        
+        // Subjects
+        if (includeSubjects && process.assuntos && process.assuntos.length > 0) {
+          doc.fontSize(12).font('Helvetica-Bold').text('Assuntos:');
+          doc.fontSize(10).font('Helvetica');
+          process.assuntos.forEach(subject => {
+            doc.text(`• ${subject.nome} (${subject.codigo})`);
+          });
+          doc.moveDown(1);
+        }
+        
+        // Movements
+        if (includeMovements && process.movimentos && process.movimentos.length > 0) {
+          doc.fontSize(12).font('Helvetica-Bold').text('Movimentações:');
+          doc.fontSize(10).font('Helvetica');
+          process.movimentos.forEach(movement => {
+            const date = formatDateSafely(movement.dataHora, 'date');
+            const time = formatDateSafely(movement.dataHora, 'time');
+            doc.text(`• ${date} ${time} - ${movement.nome}`);
+            if (movement.complemento) {
+              doc.text(`  ${movement.complemento}`);
+            }
+          });
         }
       });
+      
+      doc.end();
+    } catch (error) {
+      reject(error);
     }
   });
-  
-  doc.end();
-  
-  return Buffer.concat(buffers);
 }
 
 function generateCSV(processes: ProcessResult[], includeMovements: boolean = true, includeSubjects: boolean = true): string {
   const records: Record<string, any>[] = [];
   
   processes.forEach(process => {
-    const baseRecord: Record<string, any> = {
+    const record: Record<string, any> = {
       'Número do Processo': process.numeroProcesso,
       'Classe Processual': process.classeProcessual,
+      'Código Classe': process.codigoClasseProcessual,
       'Tribunal': process.tribunal,
       'Órgão Julgador': process.orgaoJulgador,
       'Grau': process.grau,
       'Sistema': process.sistemaProcessual,
       'Formato': process.formatoProcesso,
-      'Data de Ajuizamento': new Date(process.dataAjuizamento).toLocaleDateString('pt-BR'),
-      'Última Atualização': new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR'),
+      'Data de Ajuizamento': formatDateSafely(process.dataAjuizamento),
+      'Última Atualização': formatDateSafely(process.ultimaAtualizacao),
     };
     
-    if (includeSubjects) {
-      baseRecord['Assuntos'] = process.assuntos.map(s => `${s.nome} (${s.codigo})`).join('; ');
+    // Add subjects as semicolon-separated list
+    if (includeSubjects && process.assuntos && process.assuntos.length > 0) {
+      record['Assuntos'] = process.assuntos.map(s => s.nome).join('; ');
+      record['Códigos dos Assuntos'] = process.assuntos.map(s => s.codigo).join('; ');
+    } else {
+      record['Assuntos'] = '';
+      record['Códigos dos Assuntos'] = '';
     }
     
-    if (includeMovements && process.movimentos.length > 0) {
-      process.movimentos.forEach((movement, index) => {
-        const record: Record<string, any> = { ...baseRecord };
-        if (index === 0) {
-          // First movement includes all process data
-        } else {
-          // Subsequent movements only include movement data
-          Object.keys(record).forEach(key => {
-            if (!key.startsWith('Movimento')) {
-              record[key] = '';
-            }
-          });
-        }
-        
-        record[`Movimento ${index + 1} - Data`] = new Date(movement.dataHora).toLocaleDateString('pt-BR');
-        record[`Movimento ${index + 1} - Hora`] = new Date(movement.dataHora).toLocaleTimeString('pt-BR');
-        record[`Movimento ${index + 1} - Nome`] = movement.nome;
-        record[`Movimento ${index + 1} - Complemento`] = movement.complemento || '';
-        
-        records.push(record);
-      });
+    // Add movement summary
+    if (includeMovements && process.movimentos && process.movimentos.length > 0) {
+      record['Total de Movimentações'] = process.movimentos.length;
+      record['Última Movimentação'] = process.movimentos[0]?.nome || '';
+      record['Data Última Movimentação'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      
+      // Add all movements as a detailed text field
+      const movementsText = process.movimentos.map((mov, idx) => {
+        const date = formatDateSafely(mov.dataHora, 'date');
+        const time = formatDateSafely(mov.dataHora, 'time');
+        return `[${idx + 1}] ${date} ${time} - ${mov.nome}${mov.complemento ? ' | ' + mov.complemento : ''}`;
+      }).join(' || ');
+      
+      record['Histórico Completo de Movimentações'] = movementsText;
     } else {
-      records.push(baseRecord);
+      record['Total de Movimentações'] = 0;
+      record['Última Movimentação'] = '';
+      record['Data Última Movimentação'] = '';
+      record['Histórico Completo de Movimentações'] = '';
     }
+    
+    records.push(record);
   });
   
   return stringify(records, { 
@@ -507,8 +550,8 @@ function generateExcel(processes: ProcessResult[], includeMovements: boolean = t
       'Código Sistema': process.codigoSistema || '',
       'Formato': process.formatoProcesso,
       'Código Formato': process.codigoFormato || '',
-      'Data de Ajuizamento': new Date(process.dataAjuizamento).toLocaleDateString('pt-BR'),
-      'Última Atualização': new Date(process.ultimaAtualizacao).toLocaleDateString('pt-BR'),
+      'Data de Ajuizamento': formatDateSafely(process.dataAjuizamento),
+      'Última Atualização': formatDateSafely(process.ultimaAtualizacao),
       'Nível de Sigilo': process.nivelSigilo || '',
       'Código Município': process.codigoMunicipio || '',
     };
@@ -559,8 +602,8 @@ function generateExcel(processes: ProcessResult[], includeMovements: boolean = t
         const movRow: any = {
           'Número do Processo': process.numeroProcesso,
           'Sequência': index + 1,
-          'Data': new Date(movement.dataHora).toLocaleDateString('pt-BR'),
-          'Hora': new Date(movement.dataHora).toLocaleTimeString('pt-BR'),
+          'Data': formatDateSafely(movement.dataHora, 'date'),
+          'Hora': formatDateSafely(movement.dataHora, 'time'),
           'Código Movimento': movement.codigo || '',
           'Nome do Movimento': movement.nome,
           'Complemento': movement.complemento || '',
@@ -934,7 +977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       switch (format) {
         case "pdf":
-          const pdfBuffer = generatePDF(data, title, includeMovements, includeSubjects);
+          const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
           res.send(pdfBuffer);
