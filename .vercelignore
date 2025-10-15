@@ -1,0 +1,12 @@
+# Ignore TypeScript source files in api/ (use bundled .js files)
+api/*.ts
+api/**/*.ts
+
+# Ignore development files
+*.md
+.env.local
+.env.development
+
+# Ignore build artifacts (except dist/public)
+node_modules
+.git
