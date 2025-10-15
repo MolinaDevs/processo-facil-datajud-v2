@@ -79,19 +79,19 @@ export type AdvancedSearchRequest = z.infer<typeof advancedSearchSchema>;
 export type BulkSearchRequest = z.infer<typeof bulkSearchSchema>;
 
 export const tabulatedComplementSchema = z.object({
-  codigo: z.number(),
-  valor: z.number(),
+  codigo: z.coerce.number(),
+  valor: z.coerce.number(),
   nome: z.string(),
   descricao: z.string(),
 });
 
 export const movementOrgaoJulgadorSchema = z.object({
-  codigoOrgao: z.number(),
+  codigoOrgao: z.coerce.number(),
   nomeOrgao: z.string(),
 });
 
 export const movementSchema = z.object({
-  codigo: z.number().optional(),
+  codigo: z.coerce.number().optional(),
   nome: z.string(),
   dataHora: z.string(),
   complemento: z.string().nullable().optional(),
@@ -100,27 +100,27 @@ export const movementSchema = z.object({
 });
 
 export const subjectSchema = z.object({
-  codigo: z.number(),
+  codigo: z.coerce.number(),
   nome: z.string(),
 });
 
 export const processResultSchema = z.object({
   numeroProcesso: z.string(),
   classeProcessual: z.string(),
-  codigoClasseProcessual: z.number(),
+  codigoClasseProcessual: z.coerce.number(),
   sistemaProcessual: z.string(),
-  codigoSistema: z.number().optional(),
+  codigoSistema: z.coerce.number().optional(),
   formatoProcesso: z.string(),
-  codigoFormato: z.number().optional(),
+  codigoFormato: z.coerce.number().optional(),
   tribunal: z.string(),
   ultimaAtualizacao: z.string(),
   grau: z.string(),
   dataAjuizamento: z.string(),
-  nivelSigilo: z.number().optional(),
+  nivelSigilo: z.coerce.number().optional(),
   movimentos: z.array(movementSchema),
   orgaoJulgador: z.string(),
-  codigoOrgaoJulgador: z.number().optional(),
-  codigoMunicipio: z.number().optional(),
+  codigoOrgaoJulgador: z.coerce.number().optional(),
+  codigoMunicipio: z.coerce.number().optional(),
   assuntos: z.array(subjectSchema),
 });
 
