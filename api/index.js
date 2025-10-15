@@ -483,15 +483,31 @@ function formatDateSafely(dateValue, format = "date") {
 }
 async function generatePDF(processes, title = "Relat\xF3rio de Processos", includeMovements = true, includeSubjects = true) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({
-      margins: { top: 50, bottom: 50, left: 50, right: 50 },
-      size: "A4"
-    });
-    const buffers = [];
-    doc.on("data", (chunk) => buffers.push(chunk));
-    doc.on("end", () => resolve(Buffer.concat(buffers)));
-    doc.on("error", reject);
     try {
+      const doc = new PDFDocument({
+        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        size: "A4",
+        bufferPages: true,
+        autoFirstPage: true
+      });
+      const buffers = [];
+      doc.on("data", (chunk) => {
+        buffers.push(chunk);
+      });
+      doc.on("end", () => {
+        try {
+          const pdfBuffer = Buffer.concat(buffers);
+          console.log(`[PDF] Generated successfully. Size: ${pdfBuffer.length} bytes`);
+          resolve(pdfBuffer);
+        } catch (bufferError) {
+          console.error("[PDF] Error concatenating buffers:", bufferError);
+          reject(new Error(`Erro ao criar buffer PDF: ${bufferError instanceof Error ? bufferError.message : "desconhecido"}`));
+        }
+      });
+      doc.on("error", (err) => {
+        console.error("[PDF] PDFDocument error:", err);
+        reject(new Error(`Erro do PDFKit: ${err.message}`));
+      });
       doc.fontSize(16).font("Helvetica-Bold").text(title, { align: "center" });
       doc.fontSize(10).text(`Gerado em: ${(/* @__PURE__ */ new Date()).toLocaleString("pt-BR")}`, { align: "center" });
       doc.moveDown(2);
@@ -533,7 +549,8 @@ async function generatePDF(processes, title = "Relat\xF3rio de Processos", inclu
       });
       doc.end();
     } catch (error) {
-      reject(error);
+      console.error("[PDF] Error during generation:", error);
+      reject(new Error(`Erro ao gerar PDF: ${error instanceof Error ? error.message : "desconhecido"}`));
     }
   });
 }
@@ -561,8 +578,12 @@ function generateCSV(processes, includeMovements = true, includeSubjects = true)
     }
     if (includeMovements && process2.movimentos && process2.movimentos.length > 0) {
       record["Total de Movimenta\xE7\xF5es"] = process2.movimentos.length;
-      record["\xDAltima Movimenta\xE7\xE3o"] = process2.movimentos[0]?.nome || "";
-      record["Data \xDAltima Movimenta\xE7\xE3o"] = formatDateSafely(process2.movimentos[0]?.dataHora);
+      record["\xDAltimo Andamento"] = process2.movimentos[0]?.nome || "";
+      record["Data \xDAltimo Andamento"] = formatDateSafely(process2.movimentos[0]?.dataHora);
+      record["Pen\xFAltimo Andamento"] = process2.movimentos[1]?.nome || "";
+      record["Data Pen\xFAltimo Andamento"] = formatDateSafely(process2.movimentos[1]?.dataHora);
+      record["Antepen\xFAltimo Andamento"] = process2.movimentos[2]?.nome || "";
+      record["Data Antepen\xFAltimo Andamento"] = formatDateSafely(process2.movimentos[2]?.dataHora);
       const movementsText = process2.movimentos.map((mov, idx) => {
         const date = formatDateSafely(mov.dataHora, "date");
         const time = formatDateSafely(mov.dataHora, "time");
@@ -571,8 +592,12 @@ function generateCSV(processes, includeMovements = true, includeSubjects = true)
       record["Hist\xF3rico Completo de Movimenta\xE7\xF5es"] = movementsText;
     } else {
       record["Total de Movimenta\xE7\xF5es"] = 0;
-      record["\xDAltima Movimenta\xE7\xE3o"] = "";
-      record["Data \xDAltima Movimenta\xE7\xE3o"] = "";
+      record["\xDAltimo Andamento"] = "";
+      record["Data \xDAltimo Andamento"] = "";
+      record["Pen\xFAltimo Andamento"] = "";
+      record["Data Pen\xFAltimo Andamento"] = "";
+      record["Antepen\xFAltimo Andamento"] = "";
+      record["Data Antepen\xFAltimo Andamento"] = "";
       record["Hist\xF3rico Completo de Movimenta\xE7\xF5es"] = "";
     }
     records.push(record);
@@ -642,6 +667,21 @@ function generateExcel(processes, includeMovements = true, includeSubjects = tru
       row["C\xF3digos Assuntos"] = process2.assuntos.map((s) => s.codigo).join("; ");
     }
     row["Quantidade de Movimentos"] = process2.movimentos.length;
+    if (includeMovements && process2.movimentos.length > 0) {
+      row["\xDAltimo Andamento"] = process2.movimentos[0]?.nome || "";
+      row["Data \xDAltimo Andamento"] = formatDateSafely(process2.movimentos[0]?.dataHora);
+      row["Pen\xFAltimo Andamento"] = process2.movimentos[1]?.nome || "";
+      row["Data Pen\xFAltimo Andamento"] = formatDateSafely(process2.movimentos[1]?.dataHora);
+      row["Antepen\xFAltimo Andamento"] = process2.movimentos[2]?.nome || "";
+      row["Data Antepen\xFAltimo Andamento"] = formatDateSafely(process2.movimentos[2]?.dataHora);
+    } else {
+      row["\xDAltimo Andamento"] = "";
+      row["Data \xDAltimo Andamento"] = "";
+      row["Pen\xFAltimo Andamento"] = "";
+      row["Data Pen\xFAltimo Andamento"] = "";
+      row["Antepen\xFAltimo Andamento"] = "";
+      row["Data Antepen\xFAltimo Andamento"] = "";
+    }
     mainData.push(row);
   });
   const mainSheet = XLSX.utils.json_to_sheet(mainData);
@@ -680,8 +720,20 @@ function generateExcel(processes, includeMovements = true, includeSubjects = tru
     // Assuntos
     { wch: 30 },
     // Códigos Assuntos
-    { wch: 22 }
+    { wch: 22 },
     // Quantidade Movimentos
+    { wch: 50 },
+    // Último Andamento
+    { wch: 18 },
+    // Data Último Andamento
+    { wch: 50 },
+    // Penúltimo Andamento
+    { wch: 18 },
+    // Data Penúltimo Andamento
+    { wch: 50 },
+    // Antepenúltimo Andamento
+    { wch: 18 }
+    // Data Antepenúltimo Andamento
   ];
   mainSheet["!cols"] = wscols;
   XLSX.utils.book_append_sheet(workbook, mainSheet, "Processos");
@@ -1007,50 +1059,70 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/export", async (req, res) => {
     try {
+      console.log("[Export] Request received for format:", req.body.format);
       const { format, data, title, includeMovements, includeSubjects } = exportRequestSchema.parse(req.body);
       if (!data || data.length === 0) {
+        console.error("[Export] No data provided");
         return res.status(400).json({
           success: false,
           error: "Nenhum dado fornecido para exporta\xE7\xE3o"
         });
       }
+      console.log(`[Export] Processing ${data.length} processes for ${format} export`);
       const filename = `processos_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}`;
       switch (format) {
         case "pdf":
-          const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
-          res.setHeader("Content-Type", "application/pdf");
-          res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
-          res.send(pdfBuffer);
+          try {
+            console.log("[Export] Starting PDF generation...");
+            const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
+            console.log(`[Export] PDF generated successfully, size: ${pdfBuffer.length} bytes`);
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
+            res.send(pdfBuffer);
+          } catch (pdfError) {
+            console.error("[Export] PDF generation failed:", pdfError);
+            throw pdfError;
+          }
           break;
         case "csv":
+          console.log("[Export] Starting CSV generation...");
           const csvContent = generateCSV(data, includeMovements, includeSubjects);
+          console.log("[Export] CSV generated successfully");
           res.setHeader("Content-Type", "text/csv; charset=utf-8");
           res.setHeader("Content-Disposition", `attachment; filename="${filename}.csv"`);
           res.send(csvContent);
           break;
         case "excel":
+          console.log("[Export] Starting Excel generation...");
           const excelBuffer = generateExcel(data, includeMovements, includeSubjects);
+          console.log(`[Export] Excel generated successfully, size: ${excelBuffer.length} bytes`);
           res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
           res.setHeader("Content-Disposition", `attachment; filename="${filename}.xlsx"`);
           res.send(excelBuffer);
           break;
         case "json":
+          console.log("[Export] Starting JSON generation...");
           const jsonContent = generateJSON(data, includeMovements, includeSubjects);
+          console.log("[Export] JSON generated successfully");
           res.setHeader("Content-Type", "application/json; charset=utf-8");
           res.setHeader("Content-Disposition", `attachment; filename="${filename}.json"`);
           res.send(jsonContent);
           break;
         default:
+          console.error("[Export] Unsupported format:", format);
           return res.status(400).json({
             success: false,
             error: "Formato de exporta\xE7\xE3o n\xE3o suportado"
           });
       }
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("[Export] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro na exporta\xE7\xE3o de dados";
+      const errorStack = error instanceof Error ? error.stack : void 0;
+      console.error("[Export] Stack:", errorStack);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Erro na exporta\xE7\xE3o de dados"
+        error: errorMessage
       });
     }
   });

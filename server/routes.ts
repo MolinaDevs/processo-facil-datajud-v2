@@ -368,18 +368,38 @@ function formatDateSafely(dateValue: string | Date, format: 'date' | 'time' | 'd
 
 async function generatePDF(processes: ProcessResult[], title: string = "Relatório de Processos", includeMovements: boolean = true, includeSubjects: boolean = true): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ 
-      margins: { top: 50, bottom: 50, left: 50, right: 50 },
-      size: 'A4'
-    });
-    
-    const buffers: Buffer[] = [];
-    doc.on('data', (chunk) => buffers.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(buffers)));
-    doc.on('error', reject);
-    
     try {
-      // Header
+      const doc = new PDFDocument({ 
+        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        size: 'A4',
+        bufferPages: true,
+        autoFirstPage: true
+      });
+      
+      const buffers: Buffer[] = [];
+      
+      // Set up event handlers BEFORE any operations
+      doc.on('data', (chunk: Buffer) => {
+        buffers.push(chunk);
+      });
+      
+      doc.on('end', () => {
+        try {
+          const pdfBuffer = Buffer.concat(buffers);
+          console.log(`[PDF] Generated successfully. Size: ${pdfBuffer.length} bytes`);
+          resolve(pdfBuffer);
+        } catch (bufferError) {
+          console.error('[PDF] Error concatenating buffers:', bufferError);
+          reject(new Error(`Erro ao criar buffer PDF: ${bufferError instanceof Error ? bufferError.message : 'desconhecido'}`));
+        }
+      });
+      
+      doc.on('error', (err: Error) => {
+        console.error('[PDF] PDFDocument error:', err);
+        reject(new Error(`Erro do PDFKit: ${err.message}`));
+      });
+      
+      // Add content
       doc.fontSize(16).font('Helvetica-Bold').text(title, { align: 'center' });
       doc.fontSize(10).text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, { align: 'center' });
       doc.moveDown(2);
@@ -429,9 +449,11 @@ async function generatePDF(processes: ProcessResult[], title: string = "Relatór
         }
       });
       
+      // Finalize the PDF
       doc.end();
     } catch (error) {
-      reject(error);
+      console.error('[PDF] Error during generation:', error);
+      reject(new Error(`Erro ao gerar PDF: ${error instanceof Error ? error.message : 'desconhecido'}`));
     }
   });
 }
@@ -462,11 +484,19 @@ function generateCSV(processes: ProcessResult[], includeMovements: boolean = tru
       record['Códigos dos Assuntos'] = '';
     }
     
-    // Add movement summary
+    // Add movement summary with last 3 movements
     if (includeMovements && process.movimentos && process.movimentos.length > 0) {
       record['Total de Movimentações'] = process.movimentos.length;
-      record['Última Movimentação'] = process.movimentos[0]?.nome || '';
-      record['Data Última Movimentação'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      
+      // Last 3 movements (most recent first)
+      record['Último Andamento'] = process.movimentos[0]?.nome || '';
+      record['Data Último Andamento'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      
+      record['Penúltimo Andamento'] = process.movimentos[1]?.nome || '';
+      record['Data Penúltimo Andamento'] = formatDateSafely(process.movimentos[1]?.dataHora);
+      
+      record['Antepenúltimo Andamento'] = process.movimentos[2]?.nome || '';
+      record['Data Antepenúltimo Andamento'] = formatDateSafely(process.movimentos[2]?.dataHora);
       
       // Add all movements as a detailed text field
       const movementsText = process.movimentos.map((mov, idx) => {
@@ -478,8 +508,12 @@ function generateCSV(processes: ProcessResult[], includeMovements: boolean = tru
       record['Histórico Completo de Movimentações'] = movementsText;
     } else {
       record['Total de Movimentações'] = 0;
-      record['Última Movimentação'] = '';
-      record['Data Última Movimentação'] = '';
+      record['Último Andamento'] = '';
+      record['Data Último Andamento'] = '';
+      record['Penúltimo Andamento'] = '';
+      record['Data Penúltimo Andamento'] = '';
+      record['Antepenúltimo Andamento'] = '';
+      record['Data Antepenúltimo Andamento'] = '';
       record['Histórico Completo de Movimentações'] = '';
     }
     
@@ -563,6 +597,25 @@ function generateExcel(processes: ProcessResult[], includeMovements: boolean = t
     
     row['Quantidade de Movimentos'] = process.movimentos.length;
     
+    // Add last 3 movements (most recent first)
+    if (includeMovements && process.movimentos.length > 0) {
+      row['Último Andamento'] = process.movimentos[0]?.nome || '';
+      row['Data Último Andamento'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      
+      row['Penúltimo Andamento'] = process.movimentos[1]?.nome || '';
+      row['Data Penúltimo Andamento'] = formatDateSafely(process.movimentos[1]?.dataHora);
+      
+      row['Antepenúltimo Andamento'] = process.movimentos[2]?.nome || '';
+      row['Data Antepenúltimo Andamento'] = formatDateSafely(process.movimentos[2]?.dataHora);
+    } else {
+      row['Último Andamento'] = '';
+      row['Data Último Andamento'] = '';
+      row['Penúltimo Andamento'] = '';
+      row['Data Penúltimo Andamento'] = '';
+      row['Antepenúltimo Andamento'] = '';
+      row['Data Antepenúltimo Andamento'] = '';
+    }
+    
     mainData.push(row);
   });
   
@@ -588,6 +641,12 @@ function generateExcel(processes: ProcessResult[], includeMovements: boolean = t
     { wch: 50 }, // Assuntos
     { wch: 30 }, // Códigos Assuntos
     { wch: 22 }, // Quantidade Movimentos
+    { wch: 50 }, // Último Andamento
+    { wch: 18 }, // Data Último Andamento
+    { wch: 50 }, // Penúltimo Andamento
+    { wch: 18 }, // Data Penúltimo Andamento
+    { wch: 50 }, // Antepenúltimo Andamento
+    { wch: 18 }, // Data Antepenúltimo Andamento
   ];
   mainSheet['!cols'] = wscols;
   
@@ -964,57 +1023,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Export data endpoint
   app.post("/api/export", async (req, res) => {
     try {
+      console.log('[Export] Request received for format:', req.body.format);
+      
       const { format, data, title, includeMovements, includeSubjects } = exportRequestSchema.parse(req.body);
       
       if (!data || data.length === 0) {
+        console.error('[Export] No data provided');
         return res.status(400).json({
           success: false,
           error: "Nenhum dado fornecido para exportação"
         });
       }
 
+      console.log(`[Export] Processing ${data.length} processes for ${format} export`);
       const filename = `processos_${new Date().toISOString().split('T')[0]}`;
       
       switch (format) {
         case "pdf":
-          const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
-          res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
-          res.send(pdfBuffer);
+          try {
+            console.log('[Export] Starting PDF generation...');
+            const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
+            console.log(`[Export] PDF generated successfully, size: ${pdfBuffer.length} bytes`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
+            res.send(pdfBuffer);
+          } catch (pdfError) {
+            console.error('[Export] PDF generation failed:', pdfError);
+            throw pdfError;
+          }
           break;
           
         case "csv":
+          console.log('[Export] Starting CSV generation...');
           const csvContent = generateCSV(data, includeMovements, includeSubjects);
+          console.log('[Export] CSV generated successfully');
           res.setHeader('Content-Type', 'text/csv; charset=utf-8');
           res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
           res.send(csvContent);
           break;
           
         case "excel":
+          console.log('[Export] Starting Excel generation...');
           const excelBuffer = generateExcel(data, includeMovements, includeSubjects);
+          console.log(`[Export] Excel generated successfully, size: ${excelBuffer.length} bytes`);
           res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
           res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`);
           res.send(excelBuffer);
           break;
           
         case "json":
+          console.log('[Export] Starting JSON generation...');
           const jsonContent = generateJSON(data, includeMovements, includeSubjects);
+          console.log('[Export] JSON generated successfully');
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
           res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
           res.send(jsonContent);
           break;
           
         default:
+          console.error('[Export] Unsupported format:', format);
           return res.status(400).json({
             success: false,
             error: "Formato de exportação não suportado"
           });
       }
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("[Export] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro na exportação de dados";
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error("[Export] Stack:", errorStack);
+      
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Erro na exportação de dados"
+        error: errorMessage
       });
     }
   });
