@@ -459,92 +459,123 @@ async function bulkSearchDataJud(tribunal, processNumbers) {
   }
   return results;
 }
-function generatePDF(processes, title = "Relat\xF3rio de Processos", includeMovements = true, includeSubjects = true) {
-  const doc = new PDFDocument({
-    margins: { top: 50, bottom: 50, left: 50, right: 50 },
-    size: "A4"
-  });
-  const buffers = [];
-  doc.on("data", buffers.push.bind(buffers));
-  doc.fontSize(16).font("Helvetica-Bold").text(title, { align: "center" });
-  doc.fontSize(10).text(`Gerado em: ${(/* @__PURE__ */ new Date()).toLocaleString("pt-BR")}`, { align: "center" });
-  doc.moveDown(2);
-  processes.forEach((process2, index) => {
-    if (index > 0) {
-      doc.addPage();
+function formatDateSafely(dateValue, format = "date") {
+  if (!dateValue) return "";
+  const sentinelValues = ["N\xE3o informado", "N/A", "n/a", "n\xE3o dispon\xEDvel"];
+  if (typeof dateValue === "string" && sentinelValues.some((s) => dateValue.toLowerCase() === s.toLowerCase())) {
+    return dateValue;
+  }
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
+      return typeof dateValue === "string" ? dateValue : "";
     }
-    doc.fontSize(14).font("Helvetica-Bold").text(`Processo: ${process2.numeroProcesso}`);
-    doc.moveDown(0.5);
-    doc.fontSize(10).font("Helvetica");
-    doc.text(`Classe Processual: ${process2.classeProcessual}`);
-    doc.text(`Tribunal: ${process2.tribunal}`);
-    doc.text(`\xD3rg\xE3o Julgador: ${process2.orgaoJulgador}`);
-    doc.text(`Grau: ${process2.grau}`);
-    doc.text(`Sistema: ${process2.sistemaProcessual} (${process2.formatoProcesso})`);
-    doc.text(`Data de Ajuizamento: ${new Date(process2.dataAjuizamento).toLocaleDateString("pt-BR")}`);
-    doc.text(`\xDAltima Atualiza\xE7\xE3o: ${new Date(process2.ultimaAtualizacao).toLocaleDateString("pt-BR")}`);
-    doc.moveDown(1);
-    if (includeSubjects && process2.assuntos.length > 0) {
-      doc.fontSize(12).font("Helvetica-Bold").text("Assuntos:");
-      doc.fontSize(10).font("Helvetica");
-      process2.assuntos.forEach((subject) => {
-        doc.text(`\u2022 ${subject.nome} (${subject.codigo})`);
-      });
-      doc.moveDown(1);
+    if (format === "date") {
+      return date.toLocaleDateString("pt-BR");
+    } else if (format === "time") {
+      return date.toLocaleTimeString("pt-BR");
+    } else {
+      return `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR")}`;
     }
-    if (includeMovements && process2.movimentos.length > 0) {
-      doc.fontSize(12).font("Helvetica-Bold").text("Movimenta\xE7\xF5es:");
-      doc.fontSize(10).font("Helvetica");
-      process2.movimentos.forEach((movement) => {
-        const date = new Date(movement.dataHora).toLocaleDateString("pt-BR");
-        const time = new Date(movement.dataHora).toLocaleTimeString("pt-BR");
-        doc.text(`\u2022 ${date} ${time} - ${movement.nome}`);
-        if (movement.complemento) {
-          doc.text(`  ${movement.complemento}`);
+  } catch {
+    return typeof dateValue === "string" ? dateValue : "";
+  }
+}
+async function generatePDF(processes, title = "Relat\xF3rio de Processos", includeMovements = true, includeSubjects = true) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      margins: { top: 50, bottom: 50, left: 50, right: 50 },
+      size: "A4"
+    });
+    const buffers = [];
+    doc.on("data", (chunk) => buffers.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(buffers)));
+    doc.on("error", reject);
+    try {
+      doc.fontSize(16).font("Helvetica-Bold").text(title, { align: "center" });
+      doc.fontSize(10).text(`Gerado em: ${(/* @__PURE__ */ new Date()).toLocaleString("pt-BR")}`, { align: "center" });
+      doc.moveDown(2);
+      processes.forEach((process2, index) => {
+        if (index > 0) {
+          doc.addPage();
+        }
+        doc.fontSize(14).font("Helvetica-Bold").text(`Processo: ${process2.numeroProcesso}`);
+        doc.moveDown(0.5);
+        doc.fontSize(10).font("Helvetica");
+        doc.text(`Classe Processual: ${process2.classeProcessual}`);
+        doc.text(`Tribunal: ${process2.tribunal}`);
+        doc.text(`\xD3rg\xE3o Julgador: ${process2.orgaoJulgador}`);
+        doc.text(`Grau: ${process2.grau}`);
+        doc.text(`Sistema: ${process2.sistemaProcessual} (${process2.formatoProcesso})`);
+        doc.text(`Data de Ajuizamento: ${formatDateSafely(process2.dataAjuizamento)}`);
+        doc.text(`\xDAltima Atualiza\xE7\xE3o: ${formatDateSafely(process2.ultimaAtualizacao)}`);
+        doc.moveDown(1);
+        if (includeSubjects && process2.assuntos && process2.assuntos.length > 0) {
+          doc.fontSize(12).font("Helvetica-Bold").text("Assuntos:");
+          doc.fontSize(10).font("Helvetica");
+          process2.assuntos.forEach((subject) => {
+            doc.text(`\u2022 ${subject.nome} (${subject.codigo})`);
+          });
+          doc.moveDown(1);
+        }
+        if (includeMovements && process2.movimentos && process2.movimentos.length > 0) {
+          doc.fontSize(12).font("Helvetica-Bold").text("Movimenta\xE7\xF5es:");
+          doc.fontSize(10).font("Helvetica");
+          process2.movimentos.forEach((movement) => {
+            const date = formatDateSafely(movement.dataHora, "date");
+            const time = formatDateSafely(movement.dataHora, "time");
+            doc.text(`\u2022 ${date} ${time} - ${movement.nome}`);
+            if (movement.complemento) {
+              doc.text(`  ${movement.complemento}`);
+            }
+          });
         }
       });
+      doc.end();
+    } catch (error) {
+      reject(error);
     }
   });
-  doc.end();
-  return Buffer.concat(buffers);
 }
 function generateCSV(processes, includeMovements = true, includeSubjects = true) {
   const records = [];
   processes.forEach((process2) => {
-    const baseRecord = {
+    const record = {
       "N\xFAmero do Processo": process2.numeroProcesso,
       "Classe Processual": process2.classeProcessual,
+      "C\xF3digo Classe": process2.codigoClasseProcessual,
       "Tribunal": process2.tribunal,
       "\xD3rg\xE3o Julgador": process2.orgaoJulgador,
       "Grau": process2.grau,
       "Sistema": process2.sistemaProcessual,
       "Formato": process2.formatoProcesso,
-      "Data de Ajuizamento": new Date(process2.dataAjuizamento).toLocaleDateString("pt-BR"),
-      "\xDAltima Atualiza\xE7\xE3o": new Date(process2.ultimaAtualizacao).toLocaleDateString("pt-BR")
+      "Data de Ajuizamento": formatDateSafely(process2.dataAjuizamento),
+      "\xDAltima Atualiza\xE7\xE3o": formatDateSafely(process2.ultimaAtualizacao)
     };
-    if (includeSubjects) {
-      baseRecord["Assuntos"] = process2.assuntos.map((s) => `${s.nome} (${s.codigo})`).join("; ");
-    }
-    if (includeMovements && process2.movimentos.length > 0) {
-      process2.movimentos.forEach((movement, index) => {
-        const record = { ...baseRecord };
-        if (index === 0) {
-        } else {
-          Object.keys(record).forEach((key) => {
-            if (!key.startsWith("Movimento")) {
-              record[key] = "";
-            }
-          });
-        }
-        record[`Movimento ${index + 1} - Data`] = new Date(movement.dataHora).toLocaleDateString("pt-BR");
-        record[`Movimento ${index + 1} - Hora`] = new Date(movement.dataHora).toLocaleTimeString("pt-BR");
-        record[`Movimento ${index + 1} - Nome`] = movement.nome;
-        record[`Movimento ${index + 1} - Complemento`] = movement.complemento || "";
-        records.push(record);
-      });
+    if (includeSubjects && process2.assuntos && process2.assuntos.length > 0) {
+      record["Assuntos"] = process2.assuntos.map((s) => s.nome).join("; ");
+      record["C\xF3digos dos Assuntos"] = process2.assuntos.map((s) => s.codigo).join("; ");
     } else {
-      records.push(baseRecord);
+      record["Assuntos"] = "";
+      record["C\xF3digos dos Assuntos"] = "";
     }
+    if (includeMovements && process2.movimentos && process2.movimentos.length > 0) {
+      record["Total de Movimenta\xE7\xF5es"] = process2.movimentos.length;
+      record["\xDAltima Movimenta\xE7\xE3o"] = process2.movimentos[0]?.nome || "";
+      record["Data \xDAltima Movimenta\xE7\xE3o"] = formatDateSafely(process2.movimentos[0]?.dataHora);
+      const movementsText = process2.movimentos.map((mov, idx) => {
+        const date = formatDateSafely(mov.dataHora, "date");
+        const time = formatDateSafely(mov.dataHora, "time");
+        return `[${idx + 1}] ${date} ${time} - ${mov.nome}${mov.complemento ? " | " + mov.complemento : ""}`;
+      }).join(" || ");
+      record["Hist\xF3rico Completo de Movimenta\xE7\xF5es"] = movementsText;
+    } else {
+      record["Total de Movimenta\xE7\xF5es"] = 0;
+      record["\xDAltima Movimenta\xE7\xE3o"] = "";
+      record["Data \xDAltima Movimenta\xE7\xE3o"] = "";
+      record["Hist\xF3rico Completo de Movimenta\xE7\xF5es"] = "";
+    }
+    records.push(record);
   });
   return stringify(records, {
     header: true,
@@ -601,8 +632,8 @@ function generateExcel(processes, includeMovements = true, includeSubjects = tru
       "C\xF3digo Sistema": process2.codigoSistema || "",
       "Formato": process2.formatoProcesso,
       "C\xF3digo Formato": process2.codigoFormato || "",
-      "Data de Ajuizamento": new Date(process2.dataAjuizamento).toLocaleDateString("pt-BR"),
-      "\xDAltima Atualiza\xE7\xE3o": new Date(process2.ultimaAtualizacao).toLocaleDateString("pt-BR"),
+      "Data de Ajuizamento": formatDateSafely(process2.dataAjuizamento),
+      "\xDAltima Atualiza\xE7\xE3o": formatDateSafely(process2.ultimaAtualizacao),
       "N\xEDvel de Sigilo": process2.nivelSigilo || "",
       "C\xF3digo Munic\xEDpio": process2.codigoMunicipio || ""
     };
@@ -661,8 +692,8 @@ function generateExcel(processes, includeMovements = true, includeSubjects = tru
         const movRow = {
           "N\xFAmero do Processo": process2.numeroProcesso,
           "Sequ\xEAncia": index + 1,
-          "Data": new Date(movement.dataHora).toLocaleDateString("pt-BR"),
-          "Hora": new Date(movement.dataHora).toLocaleTimeString("pt-BR"),
+          "Data": formatDateSafely(movement.dataHora, "date"),
+          "Hora": formatDateSafely(movement.dataHora, "time"),
           "C\xF3digo Movimento": movement.codigo || "",
           "Nome do Movimento": movement.nome,
           "Complemento": movement.complemento || ""
@@ -986,7 +1017,7 @@ async function registerRoutes(app2) {
       const filename = `processos_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}`;
       switch (format) {
         case "pdf":
-          const pdfBuffer = generatePDF(data, title, includeMovements, includeSubjects);
+          const pdfBuffer = await generatePDF(data, title, includeMovements, includeSubjects);
           res.setHeader("Content-Type", "application/pdf");
           res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
           res.send(pdfBuffer);
