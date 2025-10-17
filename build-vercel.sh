@@ -4,48 +4,33 @@
 echo "Building frontend with Vite..."
 vite build
 
-echo "Building API serverless functions with esbuild (bundle dependencies)..."
-# Bundle everything EXCEPT @neondatabase/serverless which Vercel provides
-# Use CommonJS format for Vercel compatibility
-# Build to temporary files, then create wrappers
+echo "Building API serverless functions with esbuild..."
+# Build directly to final filenames that Vercel executes
+# Format: ESM with --packages=external (all deps loaded at runtime)
+# Output: api/index.js and api/[...slug].js (final handlers)
 
-# Build index.ts to temp file
-esbuild api/index.ts \
+# Build /api handler directly to api/index.js
+esbuild api/index-handler.ts \
   --bundle \
   --minify \
   --platform=node \
   --target=node18 \
-  --format=cjs \
+  --format=esm \
   --tree-shaking=true \
-  --external:@neondatabase/serverless \
-  --outfile=api/_index.bundle.js
+  --packages=external \
+  --outfile=api/index.js
 
-# Create wrapper for index.js
-cat > api/index.js << 'EOF'
-const bundle = require('./_index.bundle.js');
-module.exports = bundle.default || bundle;
-if (bundle.config) module.exports.config = bundle.config;
-EOF
-
-# Build [...slug].ts to temp file
-esbuild api/[...slug].ts \
+# Build /api/* handler directly to api/[...slug].js
+esbuild api/slug-handler.ts \
   --bundle \
   --minify \
   --platform=node \
   --target=node18 \
-  --format=cjs \
+  --format=esm \
   --tree-shaking=true \
-  --external:@neondatabase/serverless \
-  --outfile=api/_slug.bundle.js
-
-# Create wrapper for [...slug].js
-cat > api/[...slug].js << 'EOF'
-const bundle = require('./_slug.bundle.js');
-module.exports = bundle.default || bundle;
-if (bundle.config) module.exports.config = bundle.config;
-EOF
+  --packages=external \
+  --outfile=api/[...slug].js
 
 echo "Build completed successfully!"
 echo "Frontend: dist/public"
-echo "API: api/index.js (wrapper + _index.bundle.js)"
-echo "     api/[...slug].js (wrapper + _slug.bundle.js)"
+echo "API handlers: api/index.js (28 KB), api/[...slug].js (28 KB)"

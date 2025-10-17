@@ -1,0 +1,144 @@
+Oct 17 17:14:08.79
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/favorites
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:14:08.75
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/search-history
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:14:08.75
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/tribunals
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:14:08.55
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/favorites
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:14:08.54
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/search-history
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:14:08.54
+GET
+500
+processo-facil-datajud-egc2a3gbv-molinadevs-projects.vercel.app
+/api/tribunals
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/dist/slug-handler.js' imported from /var/task/api/[...slug].js at finalizeResolution (node:internal/modules/esm/resolve:280:11) at moduleResolve (node:internal/modules/esm/resolve:865:10) at moduleResolveWithNodePath (node:internal/modules/esm/resolve:989:14) at defaultResolve (node:internal/modules/esm/resolve:1032:79) at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12) at #cachedDefaultResolve (node:internal/modules/esm/loader:707:25) at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38) at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38) at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:36) at TracingChannel.tracePromise (node:diagnostics_channel:344:14) { code: 'ERR_MODULE_NOT_FOUND', url: 'file:///var/task/api/dist/slug-handler.js' }
+Oct 17 17:02:58.54
+GET
+500
+www.molinadevs.com.br
+/api/favorites
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:02:58.54
+GET
+500
+www.molinadevs.com.br
+/api/tribunals
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:02:58.54
+GET
+500
+www.molinadevs.com.br
+/api/search-history
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/tribunals
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/favorites
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/search-history
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/search-history
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/favorites
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:54.51
+GET
+500
+processo-facil-datajud-p3zmd7tmz-molinadevs-projects.vercel.app
+/api/tribunals
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.61
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/favorites
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.61
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/search-history
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.61
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/tribunals
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.42
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/favorites
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.41
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/search-history
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 17:01:14.41
+GET
+500
+processo-facil-datajud-ijrigc6pp-molinadevs-projects.vercel.app
+/api/tribunals
+ReferenceError: require is not defined in ES module scope, you can use import instead This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:4:17 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 16:52:00.51
+GET
+500
+molinadevs.com.br
+/api/favorites
+ReferenceError: module is not defined in ES module scope This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:351:2534 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: module is not defined in ES module scope This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:351:2534 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 16:52:00.51
+GET
+500
+molinadevs.com.br
+/api/tribunals
+ReferenceError: module is not defined in ES module scope This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:351:2534 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue. ReferenceError: module is not defined in ES module scope This file is being treated as an ES module because it has a '.js' file extension and '/var/task/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension. at file:///var/task/api/%5B...slug%5D.js:351:2534 at ModuleJob.run (node:internal/modules/esm/module_job:343:25) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26) at async d (/opt/rust/nodejs.js:16:21178) Node.js process exited with exit status: 1. The logs above can help with debugging the issue.
+Oct 17 16:52:00.49
+GET
+500
+molinadevs.com.br
+/api/search-history
+ReferenceError: module is not defined in ES module scope This file is being treated as an 
