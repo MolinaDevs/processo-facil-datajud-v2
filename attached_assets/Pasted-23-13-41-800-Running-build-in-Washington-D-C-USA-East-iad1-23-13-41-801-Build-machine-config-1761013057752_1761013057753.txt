@@ -1,0 +1,79 @@
+23:13:41.800 Running build in Washington, D.C., USA (East) – iad1
+23:13:41.801 Build machine configuration: 2 cores, 8 GB
+23:13:41.814 Cloning github.com/MolinaDevs/processo-facil-datajud-v2 (Branch: main, Commit: d965e0b)
+23:13:41.827 Skipping build cache, deployment was triggered without cache.
+23:13:42.645 Cloning completed: 831.000ms
+23:13:42.677 Found .vercelignore
+23:13:42.684 Removed 29 ignored files defined in .vercelignore
+23:13:42.684   /.git/config
+23:13:42.684   /.git/description
+23:13:42.684   /.git/FETCH_HEAD
+23:13:42.685   /.git/HEAD
+23:13:42.685   /.git/hooks/applypatch-msg.sample
+23:13:42.685   /.git/hooks/commit-msg.sample
+23:13:42.685   /.git/hooks/fsmonitor-watchman.sample
+23:13:42.685   /.git/hooks/post-update.sample
+23:13:42.685   /.git/hooks/pre-applypatch.sample
+23:13:42.686   /.git/hooks/pre-commit.sample
+23:13:42.986 Running "vercel build"
+23:13:43.390 Vercel CLI 48.2.9
+23:13:44.116 Running "install" command: `npm install`...
+23:13:49.699 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+23:13:49.739 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+23:13:55.738 
+23:13:55.739 added 597 packages, and audited 598 packages in 11s
+23:13:55.740 
+23:13:55.740 70 packages are looking for funding
+23:13:55.740   run `npm fund` for details
+23:13:55.775 
+23:13:55.776 12 vulnerabilities (3 low, 6 moderate, 3 high)
+23:13:55.776 
+23:13:55.777 To address issues that do not require attention, run:
+23:13:55.777   npm audit fix
+23:13:55.777 
+23:13:55.778 To address all issues possible (including breaking changes), run:
+23:13:55.778   npm audit fix --force
+23:13:55.778 
+23:13:55.778 Some issues need review, and may require choosing
+23:13:55.778 a different dependency.
+23:13:55.778 
+23:13:55.778 Run `npm audit` for details.
+23:13:56.010 
+23:13:56.011 > rest-express@1.0.0 build
+23:13:56.011 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+23:13:56.011 
+23:13:56.246 [36mvite v5.4.20 [32mbuilding for production...[36m[39m
+23:13:56.292 transforming...
+23:13:56.634 Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+23:13:56.634   npx update-browserslist-db@latest
+23:13:56.634   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+23:14:02.281 [32m✓[39m 2663 modules transformed.
+23:14:02.651 rendering chunks...
+23:14:02.667 computing gzip size...
+23:14:02.686 [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m  1.95 kB[22m[1m[22m[2m │ gzip:   0.74 kB[22m
+23:14:02.686 [2m../dist/public/[22m[2massets/[22m[35mindex-BMTB1v4M.css  [39m[1m[2m 61.47 kB[22m[1m[22m[2m │ gzip:  10.99 kB[22m
+23:14:02.686 [2m../dist/public/[22m[2massets/[22m[36mindex-DdvQCBOy.js   [39m[1m[33m560.56 kB[39m[22m[2m │ gzip: 169.79 kB[22m
+23:14:02.687 [33m
+23:14:02.687 (!) Some chunks are larger than 500 kB after minification. Consider:
+23:14:02.687 - Using dynamic import() to code-split the application
+23:14:02.687 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+23:14:02.688 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+23:14:02.688 [32m✓ built in 6.42s[39m
+23:14:02.725 
+23:14:02.726   dist/index.js  51.6kb
+23:14:02.726 
+23:14:02.726 ⚡ Done in 7ms
+23:14:02.762 Installing dependencies...
+23:14:03.770 
+23:14:03.771 up to date in 942ms
+23:14:03.772 
+23:14:03.772 70 packages are looking for funding
+23:14:03.772   run `npm fund` for details
+23:14:03.989 Using TypeScript 5.6.3 (local user-provided)
+23:14:11.291 Build Completed in /vercel/output [27s]
+23:14:11.465 Deploying outputs...
+23:14:19.147 Deployment completed
+23:14:19.920 Creating build cache...
+23:14:38.822 Created build cache: 18.893s
+23:14:38.822 Uploading build cache [108.52 MB]
+23:14:40.189 Build cache uploaded: 1.375s
