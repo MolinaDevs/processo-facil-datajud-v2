@@ -157,18 +157,19 @@ function generateCSV(processes: ProcessResult[], includeMovements: boolean = tru
       record['Códigos dos Assuntos'] = '';
     }
     
-    // ⭐ AS 6 COLUNAS DOS ÚLTIMOS 3 ANDAMENTOS
+    // ⭐ AS 6 COLUNAS DOS ÚLTIMOS 3 ANDAMENTOS (mais recentes)
     if (includeMovements && process.movimentos && process.movimentos.length > 0) {
       record['Total de Movimentações'] = process.movimentos.length;
       
-      record['Último Andamento'] = process.movimentos[0]?.nome || '';
-      record['Data Último Andamento'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      const len = process.movimentos.length;
+      record['Último Andamento'] = process.movimentos[len - 1]?.nome || '';
+      record['Data Último Andamento'] = formatDateSafely(process.movimentos[len - 1]?.dataHora);
       
-      record['Penúltimo Andamento'] = process.movimentos[1]?.nome || '';
-      record['Data Penúltimo Andamento'] = formatDateSafely(process.movimentos[1]?.dataHora);
+      record['Penúltimo Andamento'] = len >= 2 ? (process.movimentos[len - 2]?.nome || '') : '';
+      record['Data Penúltimo Andamento'] = len >= 2 ? formatDateSafely(process.movimentos[len - 2]?.dataHora) : '';
       
-      record['Antepenúltimo Andamento'] = process.movimentos[2]?.nome || '';
-      record['Data Antepenúltimo Andamento'] = formatDateSafely(process.movimentos[2]?.dataHora);
+      record['Antepenúltimo Andamento'] = len >= 3 ? (process.movimentos[len - 3]?.nome || '') : '';
+      record['Data Antepenúltimo Andamento'] = len >= 3 ? formatDateSafely(process.movimentos[len - 3]?.dataHora) : '';
       
       const movementsText = process.movimentos.map((mov, idx) => {
         const date = formatDateSafely(mov.dataHora, 'date');
@@ -230,16 +231,17 @@ function generateExcel(processes: ProcessResult[], includeMovements: boolean = t
     
     row['Quantidade de Movimentos'] = process.movimentos.length;
     
-    // ⭐ AS 6 COLUNAS DOS ÚLTIMOS 3 ANDAMENTOS
+    // ⭐ AS 6 COLUNAS DOS ÚLTIMOS 3 ANDAMENTOS (mais recentes)
     if (includeMovements && process.movimentos.length > 0) {
-      row['Último Andamento'] = process.movimentos[0]?.nome || '';
-      row['Data Último Andamento'] = formatDateSafely(process.movimentos[0]?.dataHora);
+      const len = process.movimentos.length;
+      row['Último Andamento'] = process.movimentos[len - 1]?.nome || '';
+      row['Data Último Andamento'] = formatDateSafely(process.movimentos[len - 1]?.dataHora);
       
-      row['Penúltimo Andamento'] = process.movimentos[1]?.nome || '';
-      row['Data Penúltimo Andamento'] = formatDateSafely(process.movimentos[1]?.dataHora);
+      row['Penúltimo Andamento'] = len >= 2 ? (process.movimentos[len - 2]?.nome || '') : '';
+      row['Data Penúltimo Andamento'] = len >= 2 ? formatDateSafely(process.movimentos[len - 2]?.dataHora) : '';
       
-      row['Antepenúltimo Andamento'] = process.movimentos[2]?.nome || '';
-      row['Data Antepenúltimo Andamento'] = formatDateSafely(process.movimentos[2]?.dataHora);
+      row['Antepenúltimo Andamento'] = len >= 3 ? (process.movimentos[len - 3]?.nome || '') : '';
+      row['Data Antepenúltimo Andamento'] = len >= 3 ? formatDateSafely(process.movimentos[len - 3]?.dataHora) : '';
     } else {
       row['Último Andamento'] = '';
       row['Data Último Andamento'] = '';
