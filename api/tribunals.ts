@@ -31,6 +31,26 @@ const tribunals = [
   { code: "tjdft", name: "Tribunal de Justiça do Distrito Federal", category: "Estadual" },
 ];
 
+// Agrupar tribunais por categoria
+function groupTribunalsByCategory() {
+  const grouped = new Map<string, any[]>();
+  
+  tribunals.forEach(tribunal => {
+    if (!grouped.has(tribunal.category)) {
+      grouped.set(tribunal.category, []);
+    }
+    grouped.get(tribunal.category)!.push({
+      value: tribunal.code,
+      label: tribunal.name
+    });
+  });
+  
+  return Array.from(grouped.entries()).map(([category, items]) => ({
+    category,
+    items
+  }));
+}
+
 export default function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -42,8 +62,15 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   if (req.method === 'GET') {
-    return res.status(200).json(tribunals);
+    const data = groupTribunalsByCategory();
+    return res.status(200).json({
+      success: true,
+      data
+    });
   }
   
-  return res.status(405).json({ error: 'Method not allowed' });
+  return res.status(405).json({ 
+    success: false,
+    error: 'Method not allowed' 
+  });
 }
